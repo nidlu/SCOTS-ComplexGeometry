@@ -1,5 +1,5 @@
 # SCOTS-ComplexGeometry
-This project extends the Software Configurable Optical Testing System (SCOTS), originally designed for circular pupils. The changes presented here enable application to complex and unconventional geometries, with a focus on large deflection, segmented petal reflectors.
+This project extends the Software Configurable Optical Testing System (SCOTS), originally designed for circular pupils. The changes presented here will soon enable application to complex and unconventional geometries, with a focus on large deflection, segmented petal reflectors. Please note that this repository is still in development and can as yet only be used for circular geometries.
 
 SCOTS uses an imaging camera, a test specimen (spherical mirror), and a computer monitor to measure mirror shape based on the distortion of a known phase screen displayed on the monitor and reflected in the mirror. The system enables precise identification of geometric vectors for each mirror pixel.
 
