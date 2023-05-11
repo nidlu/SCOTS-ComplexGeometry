@@ -12,6 +12,9 @@ This repository contains MATLAB implementations. The alterations are particularl
 - The software computes geometric vectors for each mirror pixel from the captured images.
 - The slope map of the reflector is calculated, and the mirror shape is integrated from the slope data.
 
+## Usage
+The repository includes all necesarry components for running the base code with an ASI120mm camera or similar. If another camera is desired to be used (non-ASI), the user must replace update the relevant expose file. Further, the repository relies on [Raysect](https://github.com/raysect) for ray tracing which is an optional asset of the library which allows for validation. Raysect is not included as it should be installed in a python environment and the code should be updated to fit the python environment of the user. Please see the Raysect page for intallation details. 
+
 ## Licensing
 This project is licensed under the GNU General Public License v3.0. See the `LICENSE` file for the full license text.
 
