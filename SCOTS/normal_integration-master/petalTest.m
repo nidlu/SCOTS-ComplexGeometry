@@ -17,13 +17,15 @@ nrows = radius*2;
 ncols = radius*2;
 n_petals = 6;
 theta = linspace(0, 2*pi, n_petals+1); % angles for the petals
-tip = 2; % tilt for one of the petals
-curvatureRadius_mm = 850; % radius of curvature in mm
-curvatureRadius = curvatureRadius_mm / image_mm_per_px; % radius of curvature in pixels
+tip = 0.2; % tilt for one of the petals
+RoC_mm = 850; % radius of curvature in mm
+RoC = RoC_mm / image_mm_per_px; % radius of curvature in pixels
 
 % Create a grid
 [x, y] = meshgrid(1:ncols, 1:nrows);
 y = flip(y);
+x_mm = x*image_mm_per_px;
+y_mm = y*image_mm_per_px;
 
 % Create the mask and depth map
 mask = zeros(nrows, ncols);
@@ -35,6 +37,7 @@ for i = 1:n_petals
     
     % Calculate the radius for each point in the grid
     rad = sqrt((x-center(1)).^2 + (y-center(2)).^2);
+    rad_mm = sqrt((x_mm-center_mm(1)).^2 + (y_mm-center_mm(2)).^2);
     
     % Calculate the gap in angle based on the radius
     angleGap = gapWidth ./ rad;
@@ -50,19 +53,85 @@ for i = 1:n_petals
     mask(in_petal) = 1;
     
     % Update the depth map with the spherical reflector equation
-    u(in_petal) = curvatureRadius - sqrt(curvatureRadius^2 - rad(in_petal).^2);
+    u(in_petal) = RoC_mm - sqrt(RoC_mm^2 - rad_mm(in_petal).^2);
     
     % Apply the tip to one of the petals
     if i == 3
         in_petal_tip = in_petal & (rad > tiltStartRadius); % apply tilt only after tiltStartRadius
-        u(in_petal_tip) = u(in_petal_tip) + tip*(rad(in_petal_tip)-tiltStartRadius)/(radius-tiltStartRadius);
+        xx = (rad(in_petal_tip)-tiltStartRadius)/(radius-tiltStartRadius);
+        u(in_petal_tip) = u(in_petal_tip) - tip*xx.^2;
     end
     if i == 4
         in_petal_tip = in_petal & (rad > tiltStartRadius); % apply tilt only after tiltStartRadius
-        u(in_petal_tip) = u(in_petal_tip) - tip*(rad(in_petal_tip)-tiltStartRadius)/(radius-tiltStartRadius);
+        xx = (rad(in_petal_tip)-tiltStartRadius)/(radius-tiltStartRadius);
+        u(in_petal_tip) = u(in_petal_tip) + tip*xx.^2;
     end
 end
+u_nan = u;
+u_nan(~mask)=NaN;
 
 imagesc(u);colorbar;
 % Compute the gradients in the u- and v-directions
-[p, q] = gradient(u);
+[w_x, w_y] = gradient(u_nan);
+gradientMask = ~isnan(w_x);
+gradientMaskEroded = gradientMask;
+
+
+
+figure();imagesc(w_x);colorbar;
+figure();imagesc(w_y);colorbar;
+%% quadratic integration
+% Set optimization parameters
+lambda = 1e-6*ones(size(w_x)); % Uniform field of weights (nrows x ncols)
+z0 = zeros(size(w_x)); % Null depth prior (nrows x ncols)
+solver = 'pcg'; % Solver ('pcg' means conjugate gradient, 'direct' means backslash i.e. sparse Cholesky) 
+precond = 'ichol'; % Preconditioner ('none' means no preconditioning, 'ichol' means incomplete Cholesky, 'CMG' means conjugate combinatorial multigrid -- the latter is fastest, but it need being installed, see README)
+
+p = w_y; q = w_x;
+p(isnan(p))=0;q(isnan(q))=0;
+%grad up, grad right(smoothintegradients assumesdown,right)
+w_quadratic = smooth_integration(p,q,gradientMaskEroded,lambda,z0,solver,precond);
+
+
+%% mumford integration
+disp('Doing Mumford-Shah integration');
+
+zinit = w_quadratic; % least-squares initialization
+zinit(isnan(zinit))=0;
+mu = 45; %45 Regularization weight for discontinuity set
+epsilon = 0.001; % Should be close to 0
+tol = 1e-8; %1e-6 Stopping criterion
+maxit = 1000; % Stopping criterion 
+
+w_mumford = mumford_shah_integration(p,q,gradientMaskEroded,lambda,z0,mu,epsilon,maxit,tol,zinit);
+%% integration constants
+se = strel('square', 3); % Create a structuring element of a 3x3 square
+gradientMaskEroded = logical(imerode(mask, se)); % Erode the mask
+
+% Find the integration constant which minimizes RMSE
+integrationConstant = -mean(w_quadratic(gradientMaskEroded)-u(gradientMaskEroded));
+w_quadratic = w_quadratic+integrationConstant;
+% Calculate RMSE
+RMSE_quadratic = sqrt(mean((w_quadratic(gradientMaskEroded)-u(gradientMaskEroded)).^2));
+
+integrationConstant = -mean(w_mumford(gradientMaskEroded)-u(gradientMaskEroded));
+w_mumford = w_mumford+integrationConstant;
+% Calculate RMSE
+RMSE_mumford = sqrt(mean((w_mumford(gradientMaskEroded)-u(gradientMaskEroded)).^2));
+
+%% plotting
+
+figure
+title("quadratic");
+finalSurfaceError = u-w_quadratic;
+finalSurfaceError(~gradientMaskEroded)=NaN;
+imagesc(finalSurfaceError);colorbar;
+
+figure
+title("mumford");
+finalSurfaceE = u-w_mumford;
+finalSurfaceError(~gradientMaskEroded)=NaN;
+imagesc(finalSurfaceError);colorbar;
+
+
+
