@@ -17,8 +17,8 @@ nrows = radius*2;
 ncols = radius*2;
 n_petals = 6;
 theta = linspace(0, 2*pi, n_petals+1); % angles for the petals
-tip = 0.2; % tilt for one of the petals
-RoC_mm = 850; % radius of curvature in mm
+tip = 0.02; % tilt for one of the petals
+RoC_mm = 850; % radius of curvature in mm NOTE CHANGED TO LARGE ROC
 RoC = RoC_mm / image_mm_per_px; % radius of curvature in pixels
 
 % Create a grid
@@ -73,7 +73,7 @@ u_nan(~mask)=NaN;
 imagesc(u);colorbar;
 % Compute the gradients in the u- and v-directions
 [w_x, w_y] = gradient(u_nan);
-gradientMask = ~isnan(w_x);
+gradientMask = ~isnan(w_x) & ~isnan(w_y);
 gradientMaskEroded = gradientMask;
 
 
@@ -106,7 +106,7 @@ maxit = 1000; % Stopping criterion
 w_mumford = mumford_shah_integration(p,q,gradientMaskEroded,lambda,z0,mu,epsilon,maxit,tol,zinit);
 %% integration constants
 se = strel('square', 3); % Create a structuring element of a 3x3 square
-gradientMaskEroded = logical(imerode(mask, se)); % Erode the mask
+%gradientMaskEroded = logical(imerode(mask, se)); % Erode the mask
 
 % Find the integration constant which minimizes RMSE
 integrationConstant = -mean(w_quadratic(gradientMaskEroded)-u(gradientMaskEroded));
@@ -129,7 +129,7 @@ imagesc(finalSurfaceError);colorbar;
 
 figure
 title("mumford");
-finalSurfaceE = u-w_mumford;
+finalSurfaceError = u-w_mumford;
 finalSurfaceError(~gradientMaskEroded)=NaN;
 imagesc(finalSurfaceError);colorbar;
 
