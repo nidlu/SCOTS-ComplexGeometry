@@ -1,16 +1,25 @@
 % Constants
 clear all; close all; clc;
-radius = 250;
-innerRadius = 50;
-gapWidth = 5; % width of the gap in pixels
-petalStartRadius = 70; % radius at which the petals start
-tiltStartRadius = petalStartRadius+10;
-center = [300, 300];
-nrows = 600;
-ncols = 600;
+image_mm_per_px = 0.7; % conversion factor from mm to pixels (change this as per your requirements)
+radius_mm = 100; % reflector radius in mm
+radius = round(radius_mm / image_mm_per_px); % reflector radius in pixels
+innerRadius_mm = 10; % inner radius in mm
+innerRadius = round(innerRadius_mm / image_mm_per_px); % inner radius in pixels
+gapWidth_mm = 2; % gap width in mm
+gapWidth = round(gapWidth_mm / image_mm_per_px); % gap width in pixels
+petalStartRadius_mm = 20; % petal start radius in mm
+petalStartRadius = round(petalStartRadius_mm / image_mm_per_px); % petal start radius in pixels
+tiltStartRadius_mm = petalStartRadius_mm + 4; % tilt start radius in mm
+tiltStartRadius = round(tiltStartRadius_mm / image_mm_per_px); % tilt start radius in pixels
+center_mm = [radius_mm, radius_mm]; % center in mm
+center = round(center_mm / image_mm_per_px); % center in pixels
+nrows = radius*2;
+ncols = radius*2;
 n_petals = 6;
 theta = linspace(0, 2*pi, n_petals+1); % angles for the petals
-tilt = 0.2; % tilt for one of the petals
+tip = 2; % tilt for one of the petals
+curvatureRadius_mm = 850; % radius of curvature in mm
+curvatureRadius = curvatureRadius_mm / image_mm_per_px; % radius of curvature in pixels
 
 % Create a grid
 [x, y] = meshgrid(1:ncols, 1:nrows);
@@ -40,19 +49,20 @@ for i = 1:n_petals
     % Update the mask
     mask(in_petal) = 1;
     
-    % Update the depth map
-    u(in_petal) = rad(in_petal);
+    % Update the depth map with the spherical reflector equation
+    u(in_petal) = curvatureRadius - sqrt(curvatureRadius^2 - rad(in_petal).^2);
     
-    % Apply the tilt to one of the petals
+    % Apply the tip to one of the petals
     if i == 3
-        in_petal_tilt = in_petal & (rad > tiltStartRadius); % apply tilt only after tiltStartRadius
-        u(in_petal_tilt) = u(in_petal_tilt) + 100 + tilt*(y(in_petal_tilt)-center(2));
+        in_petal_tip = in_petal & (rad > tiltStartRadius); % apply tilt only after tiltStartRadius
+        u(in_petal_tip) = u(in_petal_tip) + tip*(rad(in_petal_tip)-tiltStartRadius)/(radius-tiltStartRadius);
+    end
+    if i == 4
+        in_petal_tip = in_petal & (rad > tiltStartRadius); % apply tilt only after tiltStartRadius
+        u(in_petal_tip) = u(in_petal_tip) - tip*(rad(in_petal_tip)-tiltStartRadius)/(radius-tiltStartRadius);
     end
 end
 
-% Add Gaussian noise to the depth map
-std_noise = 0.02*max(u(:));
-u = u + std_noise*randn(size(u));
-
+imagesc(u);colorbar;
 % Compute the gradients in the u- and v-directions
 [p, q] = gradient(u);
