@@ -33,7 +33,8 @@ disp('Doing quadratic integration');
 lambda = 1e-6*ones(size(p)); % Uniform field of weights (nrows x ncols)
 z0 = zeros(size(p)); % Null depth prior (nrows x ncols)
 solver = 'pcg'; % Solver ('pcg' means conjugate gradient, 'direct' means backslash i.e. sparse Cholesky) 
-precond = 'CMG';  % Preconditioner for smooth integration ('none' means no preconditioning, 'ichol' means incomplete Cholesky, 'CMG' means conjugate combinatorial multigrid -- the latter is fastest, but it need being installed, see README)
+precond = 'ichol';
+%precond = 'CMG';  % Preconditioner for smooth integration ('none' means no preconditioning, 'ichol' means incomplete Cholesky, 'CMG' means conjugate combinatorial multigrid -- the latter is fastest, but it need being installed, see README)
 
 t_1 = tic;
 z_1 = smooth_integration(p,q,mask,lambda,z0,solver,precond);
