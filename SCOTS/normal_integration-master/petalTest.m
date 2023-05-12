@@ -1,5 +1,4 @@
 % Constants
-
 clear all; close all; clc;
 radius = 250;
 innerRadius = 50;
@@ -51,14 +50,9 @@ for i = 1:n_petals
     end
 end
 
+% Add Gaussian noise to the depth map
+std_noise = 0.02*max(u(:));
+u = u + std_noise*randn(size(u));
+
 % Compute the gradients in the u- and v-directions
 [p, q] = gradient(u);
-
-% Add zero-mean, Gaussian noise inside the mask
-std_noise = 0.02*max(sqrt(p(indices_mask).^2+q(indices_mask).^2));
-p = p+std_noise*randn(size(p));
-q = q+std_noise*randn(size(q));
-
-%figure()
-%imagesc(mask)
-figure();imagesc(u);colorbar();
