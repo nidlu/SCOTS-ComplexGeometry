@@ -3,20 +3,20 @@ function unwrapPhaseMap(aqPar)
     wrappedMapV = readmatrix([aqPar.testName '/postprocessing/wrappedMapV.txt']);
     wrappedMapH = readmatrix([aqPar.testName '/postprocessing/wrappedMapH.txt']);
     
-    %Extract part of image
     rectWrappedMapV = wrappedMapV(aqPar.imageMirrorCenterY_px-aqPar.measurementRadius_px:aqPar.imageMirrorCenterY_px+aqPar.measurementRadius_px,...
                                   aqPar.imageMirrorCenterX_px-aqPar.measurementRadius_px:aqPar.imageMirrorCenterX_px+aqPar.measurementRadius_px);
     rectWrappedMapH = wrappedMapH(aqPar.imageMirrorCenterY_px-aqPar.measurementRadius_px:aqPar.imageMirrorCenterY_px+aqPar.measurementRadius_px,...
                                   aqPar.imageMirrorCenterX_px-aqPar.measurementRadius_px:aqPar.imageMirrorCenterX_px+aqPar.measurementRadius_px);
     
-    %Phase unwrap within circular mask
     mask = ones(size(rectWrappedMapV));
     mask(isnan(rectWrappedMapV))=0;
-    rectWrappedMapV(isnan(rectWrappedMapV))=0; %maybe with noise?
-    unwrappedPhaseV = phase_unwrap(rectWrappedMapV,mask);
-    rectWrappedMapH(isnan(rectWrappedMapH))=0;
-    unwrappedPhaseH = phase_unwrap(rectWrappedMapH,mask);
-    %reset mask
+    
+    interpRectWrappedMapV = inpaint_nans(rectWrappedMapV);
+    interpRectWrappedMapH = inpaint_nans(rectWrappedMapH);
+                              
+    unwrappedPhaseV = phase_unwrap(interpRectWrappedMapV,mask);
+    unwrappedPhaseH = phase_unwrap(interpRectWrappedMapH,mask);
+    
     unwrappedPhaseV(~mask) = NaN;
     unwrappedPhaseH(~mask) = NaN;
     
