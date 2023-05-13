@@ -1,4 +1,5 @@
-function mask = petalMask(radius, innerRadius, petalStartRadius, center, gapWidth, n_petals, imageSizeX, imageSizeY)
+function mask = petalMask(radius, innerRadius, petalStartRadius, center,...
+                            gapWidth, n_petals, imageSizeX, imageSizeY)
     %test: imagesc(petalMask(100, 20,30, [100,100], 5,6,400,400))
     theta = linspace(0, 2*pi, n_petals+1);
 
