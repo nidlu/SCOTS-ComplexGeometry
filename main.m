@@ -16,11 +16,11 @@ addpath("SCOTS/phase_unwrap");  %
 addpath('SCOTS/zernike');       %      
 addpath('SCOTS/ZWOASI');        %%%      
 %% Load parameters
-[geom, aqPar] = loadParamsFromJSON('parametersFar.json');
+[geom, aqPar] = loadParamsFromJSON('parameters.json');
 load('cameraParams_ASI120_T1.mat'); %%load camera calibration data
 %% Flags
 aqPar.applyCameraCompensation = 0;
-testNames{1} = '08_05_2023_phaseAccTest\test8_lsq_lownoise';
+testNames{1} = 'data/08_05_2023_phaseAccTest/test8_lsq_lownoise';
 zerophase = 0;
 acquire = 1;
 integrate = 1;
@@ -52,8 +52,8 @@ for i = 1:length(testNames)
         %showImagedArea(aqPar);
         %imagePhases(aqPar,cam,cameraParams);
         %closeCameras(cam.CameraNumber)
-        makeSTLSphereWithAstigmatism(geom, aqPar, 0, [aqPar.testName '/postprocessing/w0.stl']); %
-        imageVirtualPhases(aqPar);
+        %makeSTLSphereWithAstigmatism(geom, aqPar, 0, [aqPar.testName '/postprocessing/w0.stl']); %
+        %imageVirtualPhases(aqPar);
     end
     if(integrate)
         %darkSubtract(aqPar);
@@ -61,7 +61,7 @@ for i = 1:length(testNames)
         aqPar.deltaZeroPhaseLocationX = 0;
         aqPar.deltaZeroPhaseLocationY = 0;
         %computePhaseMap(aqPar,[aqPar.testName '/darkSubtracted'],[aqPar.testName '/postprocessing']);
-        computePhaseMap(aqPar,[aqPar.testName '/imagesVirtual'],[aqPar.testName '/postprocessing']);
+        %computePhaseMap(aqPar,[aqPar.testName '/imagesVirtual'],[aqPar.testName '/postprocessing']);
         plotPhaseMap(aqPar);
         unwrapPhaseMap(aqPar);%ok
         computeSlope(aqPar,geom);

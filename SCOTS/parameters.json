@@ -13,6 +13,7 @@
       "mirrorRadius": 100
   },
   "aqPar": {
+      "isPetal": 1,
       "canvasSize_px": 1000,
       "image_mm_per_px": 0.862,
       "screen_mm_per_px": 0.249,
@@ -20,7 +21,10 @@
       "exposureSeconds": 0.20,
       "imageResizingFactor": 0.4,
       "measurementRadius_mm": 90,
-      "innerRadius_mm": 0,
+      "innerRadius_mm": 25,
+      "petalStartRadius_mm": 35,
+      "nb_petals":6,
+      "gapWidth_mm": 3,
       "rawImageSizeX": 1280,
       "rawImageSizeY": 980,
       "cameraRotX": -1.6,

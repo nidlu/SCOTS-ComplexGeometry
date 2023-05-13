@@ -12,7 +12,7 @@ function unwrapPhaseMap(aqPar)
     %Phase unwrap within circular mask
     mask = ones(size(rectWrappedMapV));
     mask(isnan(rectWrappedMapV))=0;
-    rectWrappedMapV(isnan(rectWrappedMapV))=0;
+    rectWrappedMapV(isnan(rectWrappedMapV))=0; %maybe with noise?
     unwrappedPhaseV = phase_unwrap(rectWrappedMapV,mask);
     rectWrappedMapH(isnan(rectWrappedMapH))=0;
     unwrappedPhaseH = phase_unwrap(rectWrappedMapH,mask);

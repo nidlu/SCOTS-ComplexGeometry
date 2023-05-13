@@ -13,10 +13,15 @@ function f = integrateShape(aqPar)
     z0 = zeros(size(w_x_0)); % Null depth prior (nrows x ncols)
     solver = 'pcg'; % Solver ('pcg' means conjugate gradient, 'direct' means backslash i.e. sparse Cholesky) 
     precond = 'ichol'; % Preconditioner ('none' means no preconditioning, 'ichol' means incomplete Cholesky, 'CMG' means conjugate combinatorial multigrid -- the latter is fastest, but it need being installed, see README)
-
-    Omega = ~isnan(w_x_0);
+    zinit = zeros(size(w_x_0)); % least-squares initialization
+    mu = 45; %45 Regularization weight for discontinuity set
+    epsilon = 0.001; % Should be close to 0
+    tol = 1e-8; %1e-6 Stopping criterion
+    maxit = 1000; % Stopping criterion 
+    
+    Omega = ~isnan(w_x_0) & ~isnan(w_y_0);
     %grad up, grad right(smoothintegradients assumesdown,right)
-    w = smooth_integration(-w_y_0,w_x_0,Omega,lambda,z0,solver,precond);
+    w = mumford_shah_integration(-w_y_0,w_x_0,Omega,lambda,z0,mu,epsilon,maxit,tol,zinit);
     
     surf(aqPar.mirrorX_mm_, aqPar.mirrorY_mm_, w); shading interp; view(2); 
     PV = max(w,[],'all')-min(w,[],'all');
