@@ -82,6 +82,7 @@ class CosGlow2D(InhomogeneousVolumeEmitter):
                 spectrum.samples[:] = (sin(2 * pi * fringes_per_m * point.x - phase) + 1) / 2
         return spectrum
 
+
 # scene
 world = World()
 emitter = Box(Point3D(-canvasSize_m/2, -canvasSize_m/2, -0.01), Point3D(canvasSize_m/2, canvasSize_m/2, 0.01), material=CosGlow2D(),

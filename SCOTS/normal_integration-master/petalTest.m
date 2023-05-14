@@ -67,16 +67,22 @@ for i = 1:n_petals
         u(in_petal_tip) = u(in_petal_tip) + tip*xx.^2;
     end
 end
+%% SLOPED REFLCETOR
+% u = u+0.02*x;
+% u = u+0.01*y;
+
 u_nan = u;
 u_nan(~mask)=NaN;
 
 imagesc(u);colorbar;
 % Compute the gradients in the u- and v-directions
-[w_x, w_y] = gradient(u_nan);
+%% changed slopes
+w_x = readmatrix('C:\Users\cjgn44\Google Drive\ULB\SCOTS-ComplexGeometry/data/08_05_2023_phaseAccTest/test8_lsq_lownoise/postprocessing/w_x_0.txt');
+w_y = -readmatrix('C:\Users\cjgn44\Google Drive\ULB\SCOTS-ComplexGeometry/data/08_05_2023_phaseAccTest/test8_lsq_lownoise/postprocessing/w_y_0.txt');
+%[w_x, w_y] = gradient(u_nan);
+
 gradientMask = ~isnan(w_x) & ~isnan(w_y);
 gradientMaskEroded = gradientMask;
-
-
 
 figure();imagesc(w_x);colorbar;
 figure();imagesc(w_y);colorbar;
@@ -120,18 +126,32 @@ w_mumford = w_mumford+integrationConstant;
 RMSE_mumford = sqrt(mean((w_mumford(gradientMaskEroded)-u(gradientMaskEroded)).^2));
 
 %% plotting
+% 
+% figure
+% title("quadratic");
+% finalSurfaceError = u-w_quadratic;
+% finalSurfaceError(~gradientMaskEroded)=NaN;
+% imagesc(finalSurfaceError);colorbar;
+% 
+% figure
+% title("mumford");
+% finalSurfaceError = u-w_mumford;
+% finalSurfaceError(~gradientMaskEroded)=NaN;
+% imagesc(finalSurfaceError);colorbar;
 
 figure
-title("quadratic");
-finalSurfaceError = u-w_quadratic;
-finalSurfaceError(~gradientMaskEroded)=NaN;
-imagesc(finalSurfaceError);colorbar;
+title("simulated surface");
+finalSurface = w_mumford;
+finalSurface(~gradientMaskEroded)=NaN;
+imagesc(finalSurface);colorbar;
 
 figure
-title("mumford");
-finalSurfaceError = u-w_mumford;
-finalSurfaceError(~gradientMaskEroded)=NaN;
-imagesc(finalSurfaceError);colorbar;
+title("original surface");
+finalSurface = u;
+finalSurface(~gradientMaskEroded)=NaN;
+imagesc(finalSurface);colorbar;
+
+
 
 
 

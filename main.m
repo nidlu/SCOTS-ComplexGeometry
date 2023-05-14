@@ -82,11 +82,11 @@ for i = 1:length(testNames)
         aqPar.deltaZeroPhaseLocationY = 0;
         %computePhaseMap(aqPar,[aqPar.testName '/darkSubtracted'],[aqPar.testName '/postprocessing']);
         %computePhaseMap(aqPar,[aqPar.testName '/imagesVirtual'],[aqPar.testName '/postprocessing']);
-        plotPhaseMap(aqPar);
-        unwrapPhaseMap(aqPar);%ok
-        computeSlope(aqPar,geom);
-        plotSlopes(aqPar);
-        integrateShape(aqPar);
+        %plotPhaseMap(aqPar);
+        %unwrapPhaseMap(aqPar);%ok
+        %computeSlope(aqPar,geom);
+        %plotSlopes(aqPar);
+        %integrateShape(aqPar);
         shapeAnalysis(aqPar,geom);
         %exportSTL(aqPar);
         %phaseOffset = pi;

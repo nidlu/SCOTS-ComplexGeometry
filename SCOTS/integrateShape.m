@@ -1,27 +1,38 @@
 %% integrateShape
 function integrateShape(aqPar)
     %read slopes
-    w_x_0 = readmatrix([aqPar.testName '/postprocessing/w_x_0.txt']);
-    w_y_0 = readmatrix([aqPar.testName '/postprocessing/w_y_0.txt']);
+    w_x = readmatrix([aqPar.testName '/postprocessing/w_x_0.txt']);
+    w_y = readmatrix([aqPar.testName '/postprocessing/w_y_0.txt']);
     
-    % Scale the slopes by the grid spacing
-    w_x_0 = aqPar.image_mm_per_px * w_x_0;
-    w_y_0 = aqPar.image_mm_per_px * w_y_0;
-    
+    gradientMask = ~isnan(w_x) & ~isnan(w_y);
+    gradientMaskEroded = gradientMask;
+
+    figure();imagesc(w_x);colorbar;
+    figure();imagesc(w_y);colorbar;
+    %% quadratic integration
     % Set optimization parameters
-    lambda = 1e-6*ones(size(w_x_0)); % Uniform field of weights (nrows x ncols)
-    z0 = zeros(size(w_x_0)); % Null depth prior (nrows x ncols)
+    lambda = 1e-6*ones(size(w_x)); % Uniform field of weights (nrows x ncols)
+    z0 = zeros(size(w_x)); % Null depth prior (nrows x ncols)
     solver = 'pcg'; % Solver ('pcg' means conjugate gradient, 'direct' means backslash i.e. sparse Cholesky) 
     precond = 'ichol'; % Preconditioner ('none' means no preconditioning, 'ichol' means incomplete Cholesky, 'CMG' means conjugate combinatorial multigrid -- the latter is fastest, but it need being installed, see README)
-    zinit = zeros(size(w_x_0)); % least-squares initialization
+
+    p = -w_y; q = w_x;
+    p(isnan(p))=0;q(isnan(q))=0;
+    %grad up, grad right(smoothintegradients assumesdown,right)
+    w_quadratic = smooth_integration(p,q,gradientMaskEroded,lambda,z0,solver,precond);
+
+
+    %% mumford integration
+    disp('Doing Mumford-Shah integration');
+
+    zinit = w_quadratic; % least-squares initialization
+    zinit(isnan(zinit))=0;
     mu = 45; %45 Regularization weight for discontinuity set
     epsilon = 0.001; % Should be close to 0
     tol = 1e-8; %1e-6 Stopping criterion
     maxit = 1000; % Stopping criterion 
-    
-    Omega = ~isnan(w_x_0) & ~isnan(w_y_0);
-    %grad up, grad right(smoothintegradients assumesdown,right)
-    w = mumford_shah_integration(-w_y_0,w_x_0,Omega,lambda,z0,mu,epsilon,maxit,tol,zinit);
+
+    w = mumford_shah_integration(p,q,gradientMaskEroded,lambda,z0,mu,epsilon,maxit,tol,zinit);
     
     %% plot 
     surf(aqPar.mirrorX_mm_, aqPar.mirrorY_mm_, w); shading interp; view(2); 
