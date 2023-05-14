@@ -1,5 +1,5 @@
 %% integrateShape
-function f = integrateShape(aqPar)
+function integrateShape(aqPar)
     %read slopes
     w_x_0 = readmatrix([aqPar.testName '/postprocessing/w_x_0.txt']);
     w_y_0 = readmatrix([aqPar.testName '/postprocessing/w_y_0.txt']);
@@ -23,6 +23,7 @@ function f = integrateShape(aqPar)
     %grad up, grad right(smoothintegradients assumesdown,right)
     w = mumford_shah_integration(-w_y_0,w_x_0,Omega,lambda,z0,mu,epsilon,maxit,tol,zinit);
     
+    %% plot 
     surf(aqPar.mirrorX_mm_, aqPar.mirrorY_mm_, w); shading interp; view(2); 
     PV = max(w,[],'all')-min(w,[],'all');
     title(sprintf("Measured height map, PV: %.2f mm",PV))
@@ -35,7 +36,7 @@ function f = integrateShape(aqPar)
     saveas(gcf,[aqPar.testName '/postprocessing/measuredHeightMap.png'])
 
     writematrix(w,[aqPar.testName '/postprocessing/w0.txt']);
-end
+    end
 
 %     mask and integrate slopes to create surface
 %     mask = isnan(w_y_0);
@@ -49,3 +50,26 @@ end
     %w = imfilter(w, h);
     
 %     plot(linspace(0,1,101),w(50,:))
+
+
+%     % Compute linear gradients in x and y directions
+%     lin_grad_x = X .* mean(w_x_0, 'all');
+%     lin_grad_y = Y .* mean(w_x_0, 'all');
+% 
+
+%     % Create meshgrid for linear gradient computation
+%     [X, Y] = meshgrid(1:size(w_x_0, 2), 1:size(w_x_0, 1));
+% 
+%     
+%     % Subtract linear gradients from w_x_0
+%     w_x_0_subtracted = w_x_0 - lin_grad_x - lin_grad_y;
+
+% 
+%     % Plot the subtracted w_x_0
+%     figure;
+%     imagesc(w_x_0_subtracted);
+%     colorbar;
+%     title('w_x_0 after subtracting linear gradients');
+%     xlabel('x');
+%     ylabel('y');
+%     saveas(gcf,[aqPar.testName '/postprocessing/w_x_0_subtracted.png']);

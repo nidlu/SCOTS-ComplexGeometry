@@ -3,10 +3,8 @@ function unwrapPhaseMap(aqPar)
     wrappedMapV = readmatrix([aqPar.testName '/postprocessing/wrappedMapV.txt']);
     wrappedMapH = readmatrix([aqPar.testName '/postprocessing/wrappedMapH.txt']);
     
-    rectWrappedMapV = wrappedMapV(aqPar.imageMirrorCenterY_px-aqPar.measurementRadius_px:aqPar.imageMirrorCenterY_px+aqPar.measurementRadius_px,...
-                                  aqPar.imageMirrorCenterX_px-aqPar.measurementRadius_px:aqPar.imageMirrorCenterX_px+aqPar.measurementRadius_px);
-    rectWrappedMapH = wrappedMapH(aqPar.imageMirrorCenterY_px-aqPar.measurementRadius_px:aqPar.imageMirrorCenterY_px+aqPar.measurementRadius_px,...
-                                  aqPar.imageMirrorCenterX_px-aqPar.measurementRadius_px:aqPar.imageMirrorCenterX_px+aqPar.measurementRadius_px);
+    rectWrappedMapV = wrappedMapV(aqPar.boundingBox.rows,aqPar.boundingBox.cols);
+    rectWrappedMapH = wrappedMapH(aqPar.boundingBox.rows,aqPar.boundingBox.cols);
     
     mask = ones(size(rectWrappedMapV));
     mask(isnan(rectWrappedMapV))=0;

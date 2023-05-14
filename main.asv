@@ -53,7 +53,7 @@ end
 aqPar.boundingBox = boundingBox(aqPar.mask);
 onesMatrix = ones(length(aqPar.boundingBox.rows), length(aqPar.boundingBox.cols));
 aqPar.mirrorX_px_ = -aqPar.measurementRadius_px+onesMatrix.*(1:size(onesMatrix,2));
-aqPar.mirrorY_px_ =  aqPar.measurementRadius_px-onesMatrix.*(1:size(onesMatrix,1))';
+aqPar.mirrorY_px_ =  aqPar.measurementRadius_px-onesMatrix.*(1:aqPar.measurementRadius_px*2+1)';
 aqPar.mirrorX_mm_ = aqPar.mirrorX_px_.*aqPar.image_mm_per_px;
 aqPar.mirrorY_mm_ = aqPar.mirrorY_px_.*aqPar.image_mm_per_px;
 
@@ -81,7 +81,7 @@ for i = 1:length(testNames)
         aqPar.deltaZeroPhaseLocationX = 0;
         aqPar.deltaZeroPhaseLocationY = 0;
         %computePhaseMap(aqPar,[aqPar.testName '/darkSubtracted'],[aqPar.testName '/postprocessing']);
-        %computePhaseMap(aqPar,[aqPar.testName '/imagesVirtual'],[aqPar.testName '/postprocessing']);
+        computePhaseMap(aqPar,[aqPar.testName '/imagesVirtual'],[aqPar.testName '/postprocessing']);
         plotPhaseMap(aqPar);
         unwrapPhaseMap(aqPar);%ok
         computeSlope(aqPar,geom);

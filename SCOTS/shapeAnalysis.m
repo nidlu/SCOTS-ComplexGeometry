@@ -1,10 +1,10 @@
 %% shapeAnalysis
 %read w0.txt and plot with tip, tilt, defocus removed
-function f = shapeAnalysis(aqPar,geom)
+function shapeAnalysis(aqPar,geom)
     z = readmatrix([aqPar.testName '/postprocessing/w0.txt']);
 
-    X=linspace(-1,1,length(z));
-    Y=linspace(1,-1,length(z));
+    X=linspace(-1,1,size(z,2));
+    Y=linspace(1,-1,size(z,1));
     [x,y] = meshgrid(X,Y);
     
     indices = [];
@@ -51,28 +51,28 @@ function f = shapeAnalysis(aqPar,geom)
     
     saveas(gcf,[aqPar.testName '/postprocessing/measuredHeightMapNoDefocus.png'])
 
-    wrappedMapV = readmatrix([aqPar.testName '/postprocessing/wrappedMapV.txt']);
-    wrappedMapH = readmatrix([aqPar.testName '/postprocessing/wrappedMapH.txt']);
-    figure()
-    v = [0,0];
-    offset = 0.1;
-    surf(aqPar.mirrorX_mm_, aqPar.mirrorY_mm_, surface-offset); shading interp; view(2); 
-    hold on;
-    contour(aqPar.mirrorX_mm_, aqPar.mirrorY_mm_,...
-        wrappedMapH(aqPar.imageMirrorCenterY_px-aqPar.measurementRadius_px:aqPar.imageMirrorCenterY_px+aqPar.measurementRadius_px,...
-        aqPar.imageMirrorCenterX_px-aqPar.measurementRadius_px:aqPar.imageMirrorCenterX_px+aqPar.measurementRadius_px),v,'w')
-    contour(aqPar.mirrorX_mm_, aqPar.mirrorY_mm_,...
-        wrappedMapV(aqPar.imageMirrorCenterY_px-aqPar.measurementRadius_px:aqPar.imageMirrorCenterY_px+aqPar.measurementRadius_px,...
-        aqPar.imageMirrorCenterX_px-aqPar.measurementRadius_px:aqPar.imageMirrorCenterX_px+aqPar.measurementRadius_px),v,'w')
-    title(sprintf("Residual error, grid, PV: %.2f mm\nPiston, Tilt and Defocus removed",PV))
-    xlabel("x_m - mm");
-    ylabel("y_m - mm");
-    axis square;
-    c = colorbar;
-    c.TickLabels = c.Ticks+offset;
-    set(gcf,'Position',[400 200 450 350])
-    view(2)
-    saveas(gcf,[aqPar.testName '/postprocessing/residualDeformationAndGrid.png'])
+%     wrappedMapV = readmatrix([aqPar.testName '/postprocessing/wrappedMapV.txt']);
+%     wrappedMapH = readmatrix([aqPar.testName '/postprocessing/wrappedMapH.txt']);
+%     figure()
+%     v = [0,0];
+%     offset = 0.1;
+%     surf(aqPar.mirrorX_mm_, aqPar.mirrorY_mm_, surface-offset); shading interp; view(2); 
+%     hold on;
+%     contour(aqPar.mirrorX_mm_, aqPar.mirrorY_mm_,...
+%         wrappedMapH(aqPar.imageMirrorCenterY_px-aqPar.measurementRadius_px:aqPar.imageMirrorCenterY_px+aqPar.measurementRadius_px,...
+%         aqPar.imageMirrorCenterX_px-aqPar.measurementRadius_px:aqPar.imageMirrorCenterX_px+aqPar.measurementRadius_px),v,'w')
+%     contour(aqPar.mirrorX_mm_, aqPar.mirrorY_mm_,...
+%         wrappedMapV(aqPar.imageMirrorCenterY_px-aqPar.measurementRadius_px:aqPar.imageMirrorCenterY_px+aqPar.measurementRadius_px,...
+%         aqPar.imageMirrorCenterX_px-aqPar.measurementRadius_px:aqPar.imageMirrorCenterX_px+aqPar.measurementRadius_px),v,'w')
+%     title(sprintf("Residual error, grid, PV: %.2f mm\nPiston, Tilt and Defocus removed",PV))
+%     xlabel("x_m - mm");
+%     ylabel("y_m - mm");
+%     axis square;
+%     c = colorbar;
+%     c.TickLabels = c.Ticks+offset;
+%     set(gcf,'Position',[400 200 450 350])
+%     view(2)
+%     saveas(gcf,[aqPar.testName '/postprocessing/residualDeformationAndGrid.png'])
 %     figure();
 %     surface = z-z_piston-z_tiltx-z_tilty-z_defocus-z_astigmatism;
 %     surf(surface); shading interp; view(2); 
