@@ -1,12 +1,8 @@
 %% computeSlope REMOVED PHASE OFFSET
-function f = computeSlope(aqPar, geom)
+function computeSlope(aqPar, geom)
     %read unwrapped phase, and flip because screen is flipped.
     rectUnwrappedMapV = -readmatrix([aqPar.testName '/postprocessing/rectUnwrappedMapV.txt']);
     rectUnwrappedMapH = readmatrix([aqPar.testName '/postprocessing/rectUnwrappedMapH.txt']);
-    %set image phase to 0 at screen zero-phase location
-    %is round wrong???
-    %phaseOffsetV = rectUnwrappedMapV(round(aqPar.measurementRadius_px+aqPar.deltaZeroPhaseLocationY), round(aqPar.measurementRadius_px+aqPar.deltaZeroPhaseLocationX));%check xy&sign
-    %phaseOffsetH = rectUnwrappedMapH(round(aqPar.measurementRadius_px+aqPar.deltaZeroPhaseLocationY), round(aqPar.measurementRadius_px+aqPar.deltaZeroPhaseLocationX));%check xy&sign
     
     adjRectUnwrappedMapV = rectUnwrappedMapV;%-phaseOffsetV;
     adjRectUnwrappedMapH = rectUnwrappedMapH;%-phaseOffsetH;

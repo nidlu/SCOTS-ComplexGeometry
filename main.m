@@ -40,7 +40,6 @@ aqPar.center = [aqPar.imageMirrorCenterX_px, aqPar.imageMirrorCenterY_px];
 aqPar.imageSizeX = aqPar.rawImageSizeX*aqPar.imageResizingFactor;
 aqPar.imageSizeY = aqPar.rawImageSizeY*aqPar.imageResizingFactor;
 
-
 % Petal mask
 if(aqPar.isPetal)
     aqPar.mask = petalMask(aqPar.measurementRadius_px, aqPar.innerRadius_px, aqPar.petalStartRadius_px,...
@@ -83,12 +82,12 @@ for i = 1:length(testNames)
         aqPar.deltaZeroPhaseLocationY = 0;
         %computePhaseMap(aqPar,[aqPar.testName '/darkSubtracted'],[aqPar.testName '/postprocessing']);
         %computePhaseMap(aqPar,[aqPar.testName '/imagesVirtual'],[aqPar.testName '/postprocessing']);
-        %plotPhaseMap(aqPar);
-        %unwrapPhaseMap(aqPar);%ok
-        %computeSlope(aqPar,geom);
-        %plotSlopes(aqPar);
-        %integrateShape(aqPar);
-        shapeAnalysis(aqPar,geom);
+        plotPhaseMap(aqPar);
+        unwrapPhaseMap(aqPar);%ok
+        computeSlope(aqPar,geom);
+        plotSlopes(aqPar);
+        integrateShape(aqPar);
+        shapeAnalysis(aqPar);
         %exportSTL(aqPar);
         %phaseOffset = pi;
         %rayTrace([aqPar.testName '/postprocessing/w0.stl'],[aqPar.testName '/postprocessing/rayTrace.png'],...

@@ -1,28 +1,35 @@
 %% shapeAnalysis
 %read w0.txt and plot with tip, tilt, defocus removed
-function shapeAnalysis(aqPar,geom)
+function shapeAnalysis(aqPar)
     z = readmatrix([aqPar.testName '/postprocessing/w0.txt']);
 
     Z_corrected = z; % Initialize a corrected matrix Z
-    rho_Z=((aqPar.mirrorX_mm_.^2+aqPar.mirrorY_mm_.^2).^0.5)/(aqPar.measurementRadius_mm/2);
+    rho_Z=((aqPar.mirrorX_mm_.^2+aqPar.mirrorY_mm_.^2).^0.5)/(aqPar.measurementRadius_mm);
     theta_Z=atan2(aqPar.mirrorY_mm_,aqPar.mirrorX_mm_);
 
     coef_Zernike = decomposition_Zernike(rho_Z, theta_Z, z, 10);
     % Calculate and subtract piston, tip, and tilt
-    for i = [1,2,3,5] % For the first four Zernike modes (start from 0 as per Malacara's convention)
-        Z_mode = calcul_mode_zernike_Malacara2(i-1, rho_Z, theta_Z);
-        Z_corrected = Z_corrected - coef_Zernike(i) * Z_mode;
+    for i = [1,2,3] % For the first four Zernike modes (start from 0 as per Malacara's convention)
+        Z_mode(:,:,i) = calcul_mode_zernike_Malacara2(i-1, rho_Z, theta_Z);
+        Z_corrected = Z_corrected - coef_Zernike(i) * Z_mode(:,:,i);
     end
+    
+    imagesc(Z_corrected);colorbar;
 
+    Z_mode(:,:,5) = calcul_mode_zernike_Malacara2(5-1, rho_Z, theta_Z);
+    Z_corrected = Z_corrected - coef_Zernike(5) * Z_mode(:,:,5);
+
+    figure()
     surf(aqPar.mirrorX_mm_, aqPar.mirrorY_mm_, Z_corrected); shading interp; view(2); 
     PV = max(Z_corrected,[],'all')-min(Z_corrected,[],'all');
-    title(sprintf("Error from Spherical, PV: %.2f mm\n Test: %s",PV,aqPar.testName),'Interpreter', 'none')
+    title(sprintf("Error from Spherical, PV: %.2f mm\n Test: %s",PV,aqPar.testName(end-30:end)),'Interpreter', 'none')
     hc=colorbar;
     title(hc,'mm');
     axis square;
     xlabel("x_m - mm");
     ylabel("y_m - mm");
     set(gcf,'Position',[400 200 450 350])
+    z_defocus = coef_Zernike(5)*Z_mode(:,:,5);
     z_defocus(rho_Z>1)=NaN; %defocus 1 since the pupil is defined 0 to 1 above.
     PV_defocus = max(z_defocus,[],'all')-min(z_defocus,[],'all');
     RoC = aqPar.measurementRadius_mm^2 / (2*PV_defocus);
