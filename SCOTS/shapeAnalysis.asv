@@ -10,12 +10,45 @@ function shapeAnalysis(aqPar,geom)
     coef_Zernike = decomposition_Zernike(rho_Z, theta_Z, z, 10);
     % Calculate and subtract piston, tip, and tilt
     for i = [1,2,3,5] % For the first four Zernike modes (start from 0 as per Malacara's convention)
-        Z_mode = calcul_mode_zernike_Malacara2(i-1, rho_Z, theta_Z);
+        Z_mode = calcul_mode_zernike_Malacara2(i, rho_Z, theta_Z);
         Z_corrected = Z_corrected - coef_Zernike(i) * Z_mode;
     end
 
-    surf(aqPar.mirrorX_mm_, aqPar.mirrorY_mm_, Z_corrected); shading interp; view(2); 
-    PV = max(Z_corrected,[],'all')-min(Z_corrected,[],'all');
+    
+    X=linspace(-1,1,size(z,2));
+    Y=linspace(1,-1,size(z,1));
+    [x,y] = meshgrid(X,Y);
+    
+    indices = [];
+    for n = 0:5 %decompose to the 5th degree
+        for m = -n:2:n
+            indices = [indices; n m];
+        end
+    end
+
+    % Display the coefficients associated with each Zernike polynomial used in
+    % the fit and their corresponding (n,m) indices.
+    disp(['    Coeff     ', 'n        ', 'm']);
+    moments = zernike_moments(z,indices);
+    disp([moments indices]);
+    
+    %%create maps of tip tilt power and astigmatism
+    [t,r] = cart2pol(x,y);
+    n = 0; m=0;
+    z_piston = moments(indices(:,1) == n & indices(:,2) == m)*zernike(r,t,n,m);
+    n = 1; m=-1;
+    z_tilty = moments(indices(:,1) == n & indices(:,2) == m)*zernike(r,t,n,m);
+    n = 1; m=1;
+    z_tiltx = moments(indices(:,1) == n & indices(:,2) == m)*zernike(r,t,n,m);
+    n = 2; m=0;
+    z_defocus = moments(indices(:,1) == n & indices(:,2) == m)*zernike(r,t,n,m);
+    n = 2; m=2;
+    z_astigmatism = moments(indices(:,1) == n & indices(:,2) == m)*zernike(r,t,n,m);
+    
+    figure();
+    surface = z-z_piston-z_tiltx-z_tilty-z_defocus;
+    surf(aqPar.mirrorX_mm_, aqPar.mirrorY_mm_, surface); shading interp; view(2); 
+    PV = max(surface,[],'all')-min(surface,[],'all');
     title(sprintf("Error from Spherical, PV: %.2f mm\n Test: %s",PV,aqPar.testName),'Interpreter', 'none')
     hc=colorbar;
     title(hc,'mm');
@@ -23,7 +56,7 @@ function shapeAnalysis(aqPar,geom)
     xlabel("x_m - mm");
     ylabel("y_m - mm");
     set(gcf,'Position',[400 200 450 350])
-    z_defocus(rho_Z>1)=NaN; %defocus 1 since the pupil is defined 0 to 1 above.
+    z_defocus(r>1)=NaN; %defocus 1 since the pupil is defined 0 to 1 above.
     PV_defocus = max(z_defocus,[],'all')-min(z_defocus,[],'all');
     RoC = aqPar.measurementRadius_mm^2 / (2*PV_defocus);
     annotation('textbox', [0.17, 0.13, 0.1, 0.1], 'String', ['RoC:' num2str(RoC/1000,3) 'm'],'BackgroundColor','white')

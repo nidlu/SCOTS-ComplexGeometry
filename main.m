@@ -16,6 +16,7 @@ addpath("SCOTS/phase_unwrap");  %
 addpath('SCOTS/zernike');       %      
 addpath('SCOTS/ZWOASI');        %%%      
 addpath('SCOTS/Inpaint_nans');
+addpath('SCOTS/zernikeExpansion');%  
 %% Load parameters
 [geom, aqPar] = loadParamsFromJSON('parameters.json');
 load('cameraParams_ASI120_T1.mat'); %%load camera calibration data
