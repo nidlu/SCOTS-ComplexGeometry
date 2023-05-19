@@ -17,7 +17,7 @@
       "canvasSize_px": 1000,
       "image_mm_per_px": 0.862,
       "screen_mm_per_px": 0.249,
-      "fringesOnCanvas": 10,
+      "fringesOnCanvas": 20,
       "exposureSeconds": 0.20,
       "imageResizingFactor": 0.4,
       "measurementRadius_mm": 90,
@@ -27,8 +27,8 @@
       "gapWidth_mm": 3,
       "rawImageSizeX": 1280,
       "rawImageSizeY": 980,
-      "cameraRotX": 0,
-      "cameraRotY": 0,
+      "cameraRotX": -1.6,
+      "cameraRotY": -0.5,
       "cameraRotZ": 0
   }
 }

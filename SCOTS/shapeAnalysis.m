@@ -7,17 +7,18 @@ function shapeAnalysis(aqPar)
     rho_Z=((aqPar.mirrorX_mm_.^2+aqPar.mirrorY_mm_.^2).^0.5)/(aqPar.measurementRadius_mm);
     theta_Z=atan2(aqPar.mirrorY_mm_,aqPar.mirrorX_mm_);
 
-    coef_Zernike = decomposition_Zernike(rho_Z, theta_Z, z, 10);
+    coef_Zernike = decomposition_Zernike(rho_Z, theta_Z, z, 15);
     % Calculate and subtract piston, tip, and tilt
     for i = [1,2,3] % For the first four Zernike modes (start from 0 as per Malacara's convention)
         Z_mode(:,:,i) = calcul_mode_zernike_Malacara2(i-1, rho_Z, theta_Z);
         Z_corrected = Z_corrected - coef_Zernike(i) * Z_mode(:,:,i);
-    end
+    end   
     
-    imagesc(Z_corrected);colorbar;
-
     Z_mode(:,:,5) = calcul_mode_zernike_Malacara2(5-1, rho_Z, theta_Z);
     Z_corrected = Z_corrected - coef_Zernike(5) * Z_mode(:,:,5);
+    
+    %Z_mode(:,:,13) = calcul_mode_zernike_Malacara2(13-1, rho_Z, theta_Z);
+    %Z_corrected = Z_corrected - coef_Zernike(13) * Z_mode(:,:,13);
 
     figure()
     surf(aqPar.mirrorX_mm_, aqPar.mirrorY_mm_, Z_corrected); shading interp; view(2); 

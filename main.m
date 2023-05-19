@@ -22,16 +22,18 @@ addpath('SCOTS/zernikeExpansion');%
 load('cameraParams_ASI120_T1.mat'); %%load camera calibration data
 %% Flags
 aqPar.applyCameraCompensation = 0;
-testNames{1} = 'data/08_05_2023_phaseAccTest/test8_lsq_lownoise';
+testNames{1} = 'data/19_05_2023_tolerance2/5mmOffset';
 zerophase = 0;
 acquire = 1;
 integrate = 1;
-aqPar.isPetal = 1;
+aqPar.isPetal = 0;
 %% Compute global variables
-aqPar.phases = 0:2*pi/8:2*pi*2; %0:2*pi/16:2*pi*2
+aqPar.phases = 0:2*pi/5:2*pi; %0:2*pi/16:2*pi*2
 aqPar.canvasPosition_px = [2800 -170 aqPar.canvasSize_px aqPar.canvasSize_px]; %screen phase window position
-aqPar.imageMirrorCenterX_px = 350; %px, Location of the mirror in CAM image
-aqPar.imageMirrorCenterY_px = 198; %top left, down right positive.
+%aqPar.imageMirrorCenterX_px = 350; %px, Location of the mirror in CAM image
+%aqPar.imageMirrorCenterY_px = 198; %top left, down right positive.
+aqPar.imageMirrorCenterX_px = 359;%128*2;%180;%359; %px, Location of the mirror in CAM image
+aqPar.imageMirrorCenterY_px = 153;%96*2;%75;%153; %top left, down right positive.
 aqPar.measurementRadius_px = round(aqPar.measurementRadius_mm/aqPar.image_mm_per_px); %px, Masking radius of the mirror in CAM image, max 
 aqPar.innerRadius_px =  round(aqPar.innerRadius_mm/aqPar.image_mm_per_px);
 aqPar.petalStartRadius_px = round(aqPar.petalStartRadius_mm / aqPar.image_mm_per_px);
@@ -81,7 +83,7 @@ for i = 1:length(testNames)
         aqPar.deltaZeroPhaseLocationX = 0;
         aqPar.deltaZeroPhaseLocationY = 0;
         %computePhaseMap(aqPar,[aqPar.testName '/darkSubtracted'],[aqPar.testName '/postprocessing']);
-        %computePhaseMap(aqPar,[aqPar.testName '/imagesVirtual'],[aqPar.testName '/postprocessing']);
+        computePhaseMap(aqPar,[aqPar.testName '/imagesVirtual'],[aqPar.testName '/postprocessing']);
         plotPhaseMap(aqPar);
         unwrapPhaseMap(aqPar);%ok
         computeSlope(aqPar,geom);

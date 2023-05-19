@@ -77,9 +77,9 @@ u_nan(~mask)=NaN;
 imagesc(u);colorbar;
 % Compute the gradients in the u- and v-directions
 %% changed slopes
-w_x = readmatrix('C:\Users\cjgn44\Google Drive\ULB\SCOTS-ComplexGeometry/data/08_05_2023_phaseAccTest/test8_lsq_lownoise/postprocessing/w_x_0.txt');
-w_y = -readmatrix('C:\Users\cjgn44\Google Drive\ULB\SCOTS-ComplexGeometry/data/08_05_2023_phaseAccTest/test8_lsq_lownoise/postprocessing/w_y_0.txt');
-%[w_x, w_y] = gradient(u_nan);
+%w_x = readmatrix('C:\Users\cjgn44\Google Drive\ULB\SCOTS-ComplexGeometry/data/08_05_2023_phaseAccTest/test8_lsq_lownoise/postprocessing/w_x_0.txt');
+%w_y = -readmatrix('C:\Users\cjgn44\Google Drive\ULB\SCOTS-ComplexGeometry/data/08_05_2023_phaseAccTest/test8_lsq_lownoise/postprocessing/w_y_0.txt');
+[w_x, w_y] = gradient(u_nan);
 
 gradientMask = ~isnan(w_x) & ~isnan(w_y);
 gradientMaskEroded = gradientMask;

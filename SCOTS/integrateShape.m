@@ -9,6 +9,34 @@ function integrateShape(aqPar)
 
     figure();imagesc(w_x);colorbar;
     figure();imagesc(w_y);colorbar;
+    %% Subtract gradients
+    [X, Y] = meshgrid(1:size(w_x, 2), 1:size(w_x, 1));
+    % Handle NaNs: Ignore them during fitting
+    valid_x = ~isnan(X(:)) & ~isnan(w_x(:));
+    valid_y = ~isnan(Y(:)) & ~isnan(w_y(:));
+
+    % Fit a linear plane to w_x and w_y
+    p_x = polyfit(X(valid_x), w_x(valid_x), 1);
+    p_y = polyfit(Y(valid_y), w_y(valid_y), 1);
+
+    % Evaluate the fitted plane at each point
+    lin_grad_x = polyval(p_x, X);
+    lin_grad_y = polyval(p_y, Y);
+
+    % Subtract linear gradients incl offset from w_x and w_y, preserving NaNs
+    w_x_sub = w_x - lin_grad_x;
+    w_y_sub = w_y - lin_grad_y;
+
+    % Preserve original NaNs
+    w_x_sub(isnan(w_x)) = NaN;
+    w_y_sub(isnan(w_y)) = NaN;
+    
+    w_x = w_x_sub;
+    w_y = w_y_sub;
+    %% sub tilt
+%     w_x = w_x - mean(w_x(~isnan(w_x)),'All');
+%     w_y = w_y - mean(w_y(~isnan(w_y)),'All');
+    
     %% quadratic integration
     % Set optimization parameters
     lambda = 1e-6*ones(size(w_x)); % Uniform field of weights (nrows x ncols)

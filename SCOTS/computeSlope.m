@@ -23,9 +23,7 @@ function computeSlope(aqPar, geom)
     %calculate distance to screen & camera from mirror
     s = -(geom.RoC - sqrt(geom.RoC^2 - ((diameter-d)/2).^2));
     s = s+max(abs(s),[],'All');
-    s = -s*10;
-    
-    %s=0;
+
     %%mirror to camera
     m2c(:,:,1) = geom.cameraX-mirrorX_mm;
     m2c(:,:,2) = geom.cameraY-mirrorY_mm;

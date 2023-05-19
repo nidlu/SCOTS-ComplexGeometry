@@ -21,7 +21,8 @@ from raysect.primitive import import_stl
 from raysect.optical import InterpolatedSF
 from raysect.optical.observer import BayerPipeline2D
 
-TMP_CAM_X_OFFSET = 0.0
+
+TMP_CAM_X_OFFSET = 0.005
 
 # Check if a command-line argument was provided
 if len(sys.argv) < 5:
@@ -104,7 +105,7 @@ filter_green = InterpolatedSF([100, 530, 540, 550, 560, 800], [0, 0, 1, 1, 0, 0]
 filter_blue = InterpolatedSF([100, 480, 490, 500, 510, 800], [0, 0, 1, 1, 0, 0])
 
 bayer = BayerPipeline2D(filter_red, filter_green, filter_blue,display_gamma=1,
-                            display_unsaturated_fraction=0.98, name="Bayer Filter")
+                            display_unsaturated_fraction=1, name="Bayer Filter")
 #sampler = RGBAdaptiveSampler2D(bayer, min_samples=50, fraction=0.2)
 
 camera = PinholeCamera((int(1280*scaleFactor), int(960*scaleFactor)), parent=world, transform=translate(geom.cameraX+TMP_CAM_X_OFFSET, geom.cameraY, geom.cameraZ)*rotate_y(180+cameraRotY)*rotate_x(cameraRotX),
@@ -113,7 +114,7 @@ camera.fov = fov
 
 camera.spectral_bins = 1
 camera.spectral_rays = 1
-camera.pixel_samples = 200
+camera.pixel_samples = 20
 camera.render_engine = MulticoreEngine(4)
 
 # integration resolution
