@@ -1,4 +1,4 @@
-function makeSTLSphereWithAstigmatism(geom, aqPar, astigmatism, filename)
+function makeSTLSphereWithAstigmatism(geom, aqPar, astigmatism, filename, baseShape)
     % Extract relevant parameters
     RoC = geom.RoC; % Radius of curvature (mm)
     mirrorRadius = geom.mirrorRadius; % Mirror radius (mm)
@@ -11,8 +11,14 @@ function makeSTLSphereWithAstigmatism(geom, aqPar, astigmatism, filename)
     y = x;
     [mirrorX_mm_, mirrorY_mm_] = meshgrid(x, y);
 
-    % Calculate the corresponding Z coordinates based on the RoC
-    mirrorZ_mm_ = RoC - sqrt(RoC^2 - mirrorX_mm_.^2 - mirrorY_mm_.^2);
+    % Calculate the corresponding Z coordinates based on the RoC and the specified base shape
+    if strcmpi(baseShape, 'spherical')
+        mirrorZ_mm_ = RoC - sqrt(RoC^2 - mirrorX_mm_.^2 - mirrorY_mm_.^2);
+    elseif strcmpi(baseShape, 'parabolic')
+        mirrorZ_mm_ = (mirrorX_mm_.^2 + mirrorY_mm_.^2) / (2 * RoC);
+    else
+        error('Invalid base shape. Choose "spherical" or "parabolic".');
+    end
 
     % Add astigmatism aberration
     rho = sqrt(mirrorX_mm_.^2 + mirrorY_mm_.^2) / mirrorRadius;

@@ -22,18 +22,21 @@ addpath('SCOTS/zernikeExpansion');%
 load('cameraParams_ASI120_T1.mat'); %%load camera calibration data
 %% Flags
 aqPar.applyCameraCompensation = 0;
-testNames{1} = 'data/19_05_2023_tolerance2/5mmOffset';
+testNames{1} = 'data/22_05_2023_debugging/2degCameraRotX';
 zerophase = 0;
 acquire = 1;
 integrate = 1;
 aqPar.isPetal = 0;
 %% Compute global variables
-aqPar.phases = 0:2*pi/5:2*pi; %0:2*pi/16:2*pi*2
+aqPar.phases = 0:2*pi/20:2*pi; %0:2*pi/16:2*pi*2
+%n = 20;
+%aqPar.phases = linspace(0, 2*pi, n) + rand(1,n)*0.3;  % slight random spacing
+%aqPar.phases(1) = 0;
 aqPar.canvasPosition_px = [2800 -170 aqPar.canvasSize_px aqPar.canvasSize_px]; %screen phase window position
 %aqPar.imageMirrorCenterX_px = 350; %px, Location of the mirror in CAM image
 %aqPar.imageMirrorCenterY_px = 198; %top left, down right positive.
-aqPar.imageMirrorCenterX_px = 359;%128*2;%180;%359; %px, Location of the mirror in CAM image
-aqPar.imageMirrorCenterY_px = 153;%96*2;%75;%153; %top left, down right positive.
+aqPar.imageMirrorCenterX_px = 181;%183;%182;%358; %px, Location of the mirror in CAM image
+aqPar.imageMirrorCenterY_px = 107;%77;%153; %top left, down right positive.
 aqPar.measurementRadius_px = round(aqPar.measurementRadius_mm/aqPar.image_mm_per_px); %px, Masking radius of the mirror in CAM image, max 
 aqPar.innerRadius_px =  round(aqPar.innerRadius_mm/aqPar.image_mm_per_px);
 aqPar.petalStartRadius_px = round(aqPar.petalStartRadius_mm / aqPar.image_mm_per_px);
@@ -74,19 +77,18 @@ for i = 1:length(testNames)
         %showImagedArea(aqPar);
         %imagePhases(aqPar,cam,cameraParams);
         %closeCameras(cam.CameraNumber)
-        %makeSTLSphereWithAstigmatism(geom, aqPar, 0, [aqPar.testName '/postprocessing/w0.stl']); %
+        %makeSTLSphereWithAstigmatism(geom, aqPar, 0, [aqPar.testName '/postprocessing/w0.stl'],'parabolic'); %
+        %rayTrace([aqPar.testName '/postprocessing/w0.stl'], [aqPar.testName '/imagesVirtual/imageZeroPhase.png'], 0, 'zerophase');
         %imageVirtualPhases(aqPar);
     end
     if(integrate)
         %darkSubtract(aqPar);
-        %aqPar = computeZeroPhaseLoc(aqPar);
-        aqPar.deltaZeroPhaseLocationX = 0;
-        aqPar.deltaZeroPhaseLocationY = 0;
+        [deltaX, deltaY, ~, ~] = computeZeroPhaseLoc(aqPar, [aqPar.testName '/imagesVirtual/imageZeroPhase.png']);%[aqPar.testName '/darkSubtracted/ds_imageZeroPhase.png']
         %computePhaseMap(aqPar,[aqPar.testName '/darkSubtracted'],[aqPar.testName '/postprocessing']);
         computePhaseMap(aqPar,[aqPar.testName '/imagesVirtual'],[aqPar.testName '/postprocessing']);
         plotPhaseMap(aqPar);
         unwrapPhaseMap(aqPar);%ok
-        computeSlope(aqPar,geom);
+        computeSlope(aqPar,geom,round(deltaX),round(deltaY));
         plotSlopes(aqPar);
         integrateShape(aqPar);
         shapeAnalysis(aqPar);

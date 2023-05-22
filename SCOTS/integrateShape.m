@@ -4,6 +4,10 @@ function integrateShape(aqPar)
     w_x = readmatrix([aqPar.testName '/postprocessing/w_x_0.txt']);
     w_y = readmatrix([aqPar.testName '/postprocessing/w_y_0.txt']);
     
+    % Scale the slopes by the grid spacing
+    w_x = aqPar.image_mm_per_px * w_x;
+    w_y = aqPar.image_mm_per_px * w_y;
+    
     gradientMask = ~isnan(w_x) & ~isnan(w_y);
     gradientMaskEroded = gradientMask;
 

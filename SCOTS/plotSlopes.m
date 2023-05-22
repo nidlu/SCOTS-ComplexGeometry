@@ -52,12 +52,34 @@ function plotSlopes(aqPar)
 
     % Subtract linear gradients from w_x
     w_x_0_subtracted = w_x - lin_grad_x - lin_grad_y;
-
+    
     % Plot the subtracted w_x
     figure;
     imagesc(w_x_0_subtracted);
     colorbar;
     title('w_x after subtracting linear gradients');
+    xlabel('x');
+    ylabel('y');
+    saveas(gcf,[aqPar.testName '/postprocessing/w_x_0_subtracted.png']);
+    
+    % Flatten w_x and meshgrid values, remove NaN entries
+    w_y_0_flat = w_y(:);
+    non_nan_indices = ~isnan(w_y_0_flat);
+    w_y_0_flat_non_nan = w_y_0_flat(non_nan_indices);
+    % Compute linear gradients using polyfit (1st degree polynomial fit)
+    p_x = polyfit(X_flat_non_nan, w_y_0_flat_non_nan, 1);
+    p_y = polyfit(Y_flat_non_nan, w_y_0_flat_non_nan, 1);
+    lin_grad_x = polyval(p_x, X);
+    lin_grad_y = polyval(p_y, Y);
+
+    % Subtract linear gradients from w_x
+    w_y_0_subtracted = w_y - lin_grad_x - lin_grad_y;
+
+    % Plot the subtracted w_x
+    figure;
+    imagesc(w_y_0_subtracted);
+    colorbar;
+    title('w_y after subtracting linear gradients');
     xlabel('x');
     ylabel('y');
     saveas(gcf,[aqPar.testName '/postprocessing/w_x_0_subtracted.png']);

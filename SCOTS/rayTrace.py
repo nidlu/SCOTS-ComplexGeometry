@@ -21,8 +21,8 @@ from raysect.primitive import import_stl
 from raysect.optical import InterpolatedSF
 from raysect.optical.observer import BayerPipeline2D
 
-
-TMP_CAM_X_OFFSET = 0.005
+TMP_CAM_X_OFFSET = 0.0
+TMP_CAM_X_ROT = 0
 
 # Check if a command-line argument was provided
 if len(sys.argv) < 5:
@@ -35,8 +35,8 @@ output_file_path = sys.argv[2]
 phase = float(sys.argv[3])
 orientation = sys.argv[4].lower()
 
-if orientation not in ["horizontal", "vertical"]:
-    print("Error: The orientation must be either 'horizontal' or 'vertical'.")
+if orientation not in ["horizontal", "vertical", "zerophase"]:
+    print("Error: Thee orientation must be either 'horizontal' or 'vertical'.")
     sys.exit(1)
 
 #output_file_path = r"/mnt/c/Users/cjgn44/Google Drive/ULB/SCOTS5/rayTraceTest.png"
@@ -81,6 +81,9 @@ class CosGlow2D(InhomogeneousVolumeEmitter):
                 spectrum.samples[:] = (sin(2 * pi * fringes_per_m * point.y + phase) + 1) / 2
             elif orientation == "vertical":
                 spectrum.samples[:] = (sin(2 * pi * fringes_per_m * point.x - phase) + 1) / 2
+            elif orientation == "zerophase":
+                if(abs(point.x) < 1e-3 and abs(point.y) <1e-3):
+                    spectrum.samples[:] = 1
         return spectrum
 
 
@@ -108,7 +111,8 @@ bayer = BayerPipeline2D(filter_red, filter_green, filter_blue,display_gamma=1,
                             display_unsaturated_fraction=1, name="Bayer Filter")
 #sampler = RGBAdaptiveSampler2D(bayer, min_samples=50, fraction=0.2)
 
-camera = PinholeCamera((int(1280*scaleFactor), int(960*scaleFactor)), parent=world, transform=translate(geom.cameraX+TMP_CAM_X_OFFSET, geom.cameraY, geom.cameraZ)*rotate_y(180+cameraRotY)*rotate_x(cameraRotX),
+camera = PinholeCamera((int(1280*scaleFactor), int(960*scaleFactor)), parent=world, transform=translate(geom.cameraX+TMP_CAM_X_OFFSET, 
+                                                            geom.cameraY, geom.cameraZ)*rotate_y(180+cameraRotY)*rotate_x(cameraRotX+TMP_CAM_X_ROT),
                        pipelines=[bayer])
 camera.fov = fov
 

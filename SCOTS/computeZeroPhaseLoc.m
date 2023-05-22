@@ -1,6 +1,5 @@
-function aqPar = computeZeroPhaseLoc(aqPar)
-    zeroPhaseImg = imread([aqPar.testName '/darkSubtracted/ds_imageZeroPhase.png']);
-    
+function [deltaX, deltaY, centX0, centY0] = computeZeroPhaseLoc(aqPar, imgPath)
+    zeroPhaseImg = im2gray(imread(imgPath));
     maximum = max(max(zeroPhaseImg));
     [centY0,centX0]=find(zeroPhaseImg==maximum);
     
@@ -15,6 +14,6 @@ function aqPar = computeZeroPhaseLoc(aqPar)
     centX = centX0+centX1-11;
     centY = centY0+centY1-11;
     
-    aqPar.deltaZeroPhaseLocationX = centX-aqPar.imageMirrorCenterX_px; %px, ok, manually read from zero phase image, difference..
-    aqPar.deltaZeroPhaseLocationY = centY-aqPar.imageMirrorCenterY_px; %px, ok   .. between zero phase in image and assumed center
+    deltaX = centX-aqPar.imageMirrorCenterX_px; %px, ok, manually read from zero phase image, difference..
+    deltaY = centY-aqPar.imageMirrorCenterY_px; %px, ok   .. between zero phase in image and assumed center
 end

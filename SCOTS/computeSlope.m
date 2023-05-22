@@ -1,11 +1,20 @@
 %% computeSlope REMOVED PHASE OFFSET
-function computeSlope(aqPar, geom)
+function computeSlope(aqPar, geom, deltaX, deltaY)
     %read unwrapped phase, and flip because screen is flipped.
     rectUnwrappedMapV = -readmatrix([aqPar.testName '/postprocessing/rectUnwrappedMapV.txt']);
     rectUnwrappedMapH = readmatrix([aqPar.testName '/postprocessing/rectUnwrappedMapH.txt']);
     
-    adjRectUnwrappedMapV = rectUnwrappedMapV;%-phaseOffsetV;
-    adjRectUnwrappedMapH = rectUnwrappedMapH;%-phaseOffsetH;
+    [rows, cols] = size(rectUnwrappedMapV);
+    centerX = round(cols/2);
+    centerY = round(rows/2);
+    indexX = centerX + deltaX;
+    indexY = centerY + deltaY;
+
+    phaseOffsetV = rectUnwrappedMapV(indexY,indexX);
+    phaseOffsetH = rectUnwrappedMapH(indexY,indexX);
+    
+    adjRectUnwrappedMapV = rectUnwrappedMapV-phaseOffsetV;
+    adjRectUnwrappedMapH = rectUnwrappedMapH-phaseOffsetH;
     
     mirrorX_mm = aqPar.mirrorX_mm_+geom.mirrorCenterX;
     mirrorY_mm = aqPar.mirrorY_mm_+geom.mirrorCenterY;
@@ -36,7 +45,7 @@ function computeSlope(aqPar, geom)
     m2s(:,:,3) = geom.zeroPhaseScreenZ-(geom.mirrorCenterZ+s);
     m2sNorm = vecnorm(m2s, 2, 3);
     m2sNormalized = m2s./m2sNorm;
-       
+
     avg = m2cNormalized + m2sNormalized;
     avgNorm = vecnorm(avg, 2, 3); % Calculate norm of vector field along the third dimension
     avgNormalized = avg ./ avgNorm;
