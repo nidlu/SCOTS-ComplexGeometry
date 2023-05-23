@@ -43,7 +43,7 @@ aqPar.gapWidth_px = round(aqPar.gapWidth_mm / aqPar.image_mm_per_px);
 aqPar.center = [aqPar.imageMirrorCenterX_px, aqPar.imageMirrorCenterY_px];
 aqPar.imageSizeX = aqPar.rawImageSizeX*aqPar.imageResizingFactor;
 aqPar.imageSizeY = aqPar.rawImageSizeY*aqPar.imageResizingFactor;
-
+%mistkae
 % Petal mask
 if(aqPar.isPetal)
     aqPar.mask = petalMask(aqPar.measurementRadius_px, aqPar.innerRadius_px, aqPar.petalStartRadius_px,...
