@@ -22,20 +22,22 @@ addpath('SCOTS/zernikeExpansion');%
 load('cameraParams_ASI120_T1.mat'); %%load camera calibration data
 %% Flags
 aqPar.applyCameraCompensation = 0;
-testNames{1} = 'data/23_05_2023_debugging3/cam50mmX';
+testNames{1} = 'data/23_05_2023_debugging/minimalStigmatic_4phase';
 zerophase = 0;
-acquire = 0;
+acquire = 1;
 integrate = 1;
 aqPar.isPetal = 0;
 %% Compute global variables
-aqPar.phases = 0:2*pi/8:2*pi; %0:2*pi/16:2*pi*2
-%aqPar.phases = [0, pi/2, pi, 3*pi/2];
+%aqPar.phases = 0:2*pi/4:2*pi; %0:2*pi/16:2*pi*2
+aqPar.phases = [0, pi/2, pi, 3*
 %n = 20;
 %aqPar.phases = linspace(0, 2*pi, n) + rand(1,n)*0.3;  % slight random spacing
 %aqPar.phases(1) = 0;
 aqPar.canvasPosition_px = [2800 -170 aqPar.canvasSize_px aqPar.canvasSize_px]; %screen phase window position
-aqPar.imageMirrorCenterX_px = 158;%358; %px, Location of the mirror in CAM image
-aqPar.imageMirrorCenterY_px = 96; %top left, down right positive.
+%aqPar.imageMirrorCenterX_px = 350; %px, Location of the mirror in CAM image
+%aqPar.imageMirrorCenterY_px = 198; %top left, down right positive.
+aqPar.imageMirrorCenterX_px = 128;%183;%182;%358; %px, Location of the mirror in CAM image
+aqPar.imageMirrorCenterY_px = 96;%77;%153; %top left, down right positive.
 aqPar.measurementRadius_px = round(aqPar.measurementRadius_mm/aqPar.image_mm_per_px); %px, Masking radius of the mirror in CAM image, max 
 aqPar.innerRadius_px =  round(aqPar.innerRadius_mm/aqPar.image_mm_per_px);
 aqPar.petalStartRadius_px = round(aqPar.petalStartRadius_mm / aqPar.image_mm_per_px);

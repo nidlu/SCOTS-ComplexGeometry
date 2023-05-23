@@ -2,6 +2,7 @@ function [deltaX, deltaY, centX0, centY0] = computeZeroPhaseLoc(aqPar, imgPath)
     zeroPhaseImg = im2gray(imread(imgPath));
     maximum = max(max(zeroPhaseImg));
     [centY0,centX0]=find(zeroPhaseImg==maximum);
+    centY0 = centY0(1); centX0 = centX0(1);
     
     zeroPhaseImgCrop = zeroPhaseImg(centY0-10:centY0+10,centX0-10:centX0+10);
     

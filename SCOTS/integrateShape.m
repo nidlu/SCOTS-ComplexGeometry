@@ -14,29 +14,29 @@ function integrateShape(aqPar)
     figure();imagesc(w_x);colorbar;
     figure();imagesc(w_y);colorbar;
     %% Subtract gradients
-    [X, Y] = meshgrid(1:size(w_x, 2), 1:size(w_x, 1));
-    % Handle NaNs: Ignore them during fitting
-    valid_x = ~isnan(X(:)) & ~isnan(w_x(:));
-    valid_y = ~isnan(Y(:)) & ~isnan(w_y(:));
-
-    % Fit a linear plane to w_x and w_y
-    p_x = polyfit(X(valid_x), w_x(valid_x), 1);
-    p_y = polyfit(Y(valid_y), w_y(valid_y), 1);
-
-    % Evaluate the fitted plane at each point
-    lin_grad_x = polyval(p_x, X);
-    lin_grad_y = polyval(p_y, Y);
-
-    % Subtract linear gradients incl offset from w_x and w_y, preserving NaNs
-    w_x_sub = w_x - lin_grad_x;
-    w_y_sub = w_y - lin_grad_y;
-
-    % Preserve original NaNs
-    w_x_sub(isnan(w_x)) = NaN;
-    w_y_sub(isnan(w_y)) = NaN;
-    
-    w_x = w_x_sub;
-    w_y = w_y_sub;
+%     [X, Y] = meshgrid(1:size(w_x, 2), 1:size(w_x, 1));
+%     % Handle NaNs: Ignore them during fitting
+%     valid_x = ~isnan(X(:)) & ~isnan(w_x(:));
+%     valid_y = ~isnan(Y(:)) & ~isnan(w_y(:));
+% 
+%     % Fit a linear plane to w_x and w_y
+%     p_x = polyfit(X(valid_x), w_x(valid_x), 1);
+%     p_y = polyfit(Y(valid_y), w_y(valid_y), 1);
+% 
+%     % Evaluate the fitted plane at each point
+%     lin_grad_x = polyval(p_x, X);
+%     lin_grad_y = polyval(p_y, Y);
+% 
+%     % Subtract linear gradients incl offset from w_x and w_y, preserving NaNs
+%     w_x_sub = w_x - lin_grad_x;
+%     w_y_sub = w_y - lin_grad_y;
+% 
+%     % Preserve original NaNs
+%     w_x_sub(isnan(w_x)) = NaN;
+%     w_y_sub(isnan(w_y)) = NaN;
+%     
+%     w_x = w_x_sub;
+%     w_y = w_y_sub;
     %% sub tilt
 %     w_x = w_x - mean(w_x(~isnan(w_x)),'All');
 %     w_y = w_y - mean(w_y(~isnan(w_y)),'All');
@@ -79,40 +79,4 @@ function integrateShape(aqPar)
     saveas(gcf,[aqPar.testName '/postprocessing/measuredHeightMap.png'])
 
     writematrix(w,[aqPar.testName '/postprocessing/w0.txt']);
-    end
-
-%     mask and integrate slopes to create surface
-%     mask = isnan(w_y_0);
-%     w_y_0(mask) = 0;
-%     w_x_0(mask) = 0;
-%     w = intgrad2(w_x_0,w_y_0, aqPar.imagePxScale, aqPar.imagePxScale);
-%     hold on
-%     w(mask)=NaN;
-%     plot(linspace(0,1,201),w(100,:))
-    %h = fspecial('average', 2);
-    %w = imfilter(w, h);
-    
-%     plot(linspace(0,1,101),w(50,:))
-
-
-%     % Compute linear gradients in x and y directions
-%     lin_grad_x = X .* mean(w_x_0, 'all');
-%     lin_grad_y = Y .* mean(w_x_0, 'all');
-% 
-
-%     % Create meshgrid for linear gradient computation
-%     [X, Y] = meshgrid(1:size(w_x_0, 2), 1:size(w_x_0, 1));
-% 
-%     
-%     % Subtract linear gradients from w_x_0
-%     w_x_0_subtracted = w_x_0 - lin_grad_x - lin_grad_y;
-
-% 
-%     % Plot the subtracted w_x_0
-%     figure;
-%     imagesc(w_x_0_subtracted);
-%     colorbar;
-%     title('w_x_0 after subtracting linear gradients');
-%     xlabel('x');
-%     ylabel('y');
-%     saveas(gcf,[aqPar.testName '/postprocessing/w_x_0_subtracted.png']);
+end

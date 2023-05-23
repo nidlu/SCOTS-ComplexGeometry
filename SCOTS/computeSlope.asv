@@ -13,6 +13,9 @@ function computeSlope(aqPar, geom, deltaX, deltaY)
     phaseOffsetV = rectUnwrappedMapV(indexY,indexX);
     phaseOffsetH = rectUnwrappedMapH(indexY,indexX);
 
+    phaseOffsetV = rectUnwrappedMapV(56,56);
+    phaseOffsetH = rectUnwrappedMapH(56,56);
+    
     adjRectUnwrappedMapV = rectUnwrappedMapV-phaseOffsetV;
     adjRectUnwrappedMapH = rectUnwrappedMapH-phaseOffsetH;
     
@@ -60,12 +63,6 @@ function computeSlope(aqPar, geom, deltaX, deltaY)
     writematrix(w_x,[aqPar.testName '/postprocessing/w_x_0.txt']);
     writematrix(w_y,[aqPar.testName '/postprocessing/w_y_0.txt']);
 end
-
-    %% DDDDEBBBUIG
-%     phaseOffsetV = rectUnwrappedMapV(56,56);
-%     phaseOffsetH = rectUnwrappedMapH(56,56);
-%     phaseOffsetV = -0.4;
-%     phaseOffsetH = 0.4;
 
     %geom.cameraX = -geom.cameraX;
     %geom.cameraX = 0;

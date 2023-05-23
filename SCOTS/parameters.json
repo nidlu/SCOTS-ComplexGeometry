@@ -1,17 +1,17 @@
 {
   "geom": {
-      "cameraX": -44,
-      "cameraY": 189,
-      "cameraZ": -2,
-      "zeroPhaseScreenX": 135,
-      "zeroPhaseScreenY": 237,
-      "zeroPhaseScreenZ": 0,
-      "mirrorCenterX": 50,
-      "mirrorCenterY": 223,
-      "mirrorCenterZ": -1400,
-      "RoC": 2500,
-      "mirrorRadius": 100
-  },
+    "cameraX": -50,
+    "cameraY": 100,
+    "cameraZ": -2,
+    "zeroPhaseScreenX": 50,
+    "zeroPhaseScreenY": 100,
+    "zeroPhaseScreenZ": 0,
+    "mirrorCenterX": 0,
+    "mirrorCenterY": 100,
+    "mirrorCenterZ": -1400,
+    "RoC": 2500,
+    "mirrorRadius": 100
+},
   "aqPar": {
       "isPetal": 1,
       "canvasSize_px": 1000,
@@ -26,7 +26,7 @@
       "nb_petals":6,
       "gapWidth_mm": 3,
       "rawImageSizeX": 1280,
-      "rawImageSizeY": 980,
+      "rawImageSizeY": 960,
       "cameraRotX": 0,
       "cameraRotY": 0,
       "cameraRotZ": 0

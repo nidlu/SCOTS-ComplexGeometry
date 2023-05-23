@@ -35,8 +35,13 @@
 
 function phase = sineFitRestricted(x,y,plotTrue)
     fit = @(phase,x) (sin(x + phase));            % Function to fit
-    fcn = @(phase) sum((fit(phase,x) - y).^2);    % Least-Squares cost function
-    phase = fminsearch(fcn,0);                    % Minimise Least-Squares
+    if(length(x)==4 && 0)
+        %phase = atan2( (y(4)-y(2)) / (y(1)-y(3)) );
+        phase = atan2(y(4)-y(2), y(1)-y(3));
+    else
+        fcn = @(phase) sum((fit(phase,x) - y).^2);    % Least-Squares cost function
+        phase = fminsearch(fcn,0);                    % Minimise Least-Squares
+    end
     if(plotTrue)
         figure(1)
         plot(x,y,'b',  x,fit(phase,x), 'r')
