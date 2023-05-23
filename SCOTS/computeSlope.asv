@@ -1,23 +1,20 @@
 %% computeSlope REMOVED PHASE OFFSET
-function computeSlope(aqPar, geom, deltaX, deltaY)
+function computeSlope(aqPar, geom,centX0,centY0)
     %read unwrapped phase, and flip because screen is flipped.
-    rectUnwrappedMapV = -readmatrix([aqPar.testName '/postprocessing/rectUnwrappedMapV.txt']);
-    rectUnwrappedMapH = readmatrix([aqPar.testName '/postprocessing/rectUnwrappedMapH.txt']);
+    unwrappedMapV = -readmatrix([aqPar.testName '/postprocessing/unwrappedMapV.txt']);
+    unwrappedMapH = readmatrix([aqPar.testName '/postprocessing/unwrappedMapH.txt']);
     
-    [rows, cols] = size(rectUnwrappedMapV);
-    centerX = round(cols/2);
-    centerY = round(rows/2);
-    indexX = centerX + deltaX;
-    indexY = centerY + deltaY;
-
-    phaseOffsetV = rectUnwrappedMapV(indexY,indexX);
-    phaseOffsetH = rectUnwrappedMapH(indexY,indexX);
-
-    phaseOffsetV = rectUnwrappedMapV(56,56);
-    phaseOffsetH = rectUnwrappedMapH(56,56);
-    
-    adjRectUnwrappedMapV = rectUnwrappedMapV-phaseOffsetV;
-    adjRectUnwrappedMapH = rectUnwrappedMapH-phaseOffsetH;
+%     [rows, cols] = size(rectUnwrappedMapV);
+%     centerX = round(cols/2);
+%     centerY = round(rows/2);
+%     indexX = centerX + deltaX;
+%     indexY = centerY + deltaY;
+% 
+    phaseOffsetV = unwrappedMapV(centY0,centX0);
+    phaseOffsetH = unwrappedMapH(centY0,centX0);
+% 
+%     adjRectUnwrappedMapV = rectUnwrappedMapV-phaseOffsetV;
+%     adjRectUnwrappedMapH = rectUnwrappedMapH-phaseOffsetH;
     
     mirrorX_mm = aqPar.mirrorX_mm_+geom.mirrorCenterX;
     mirrorY_mm = aqPar.mirrorY_mm_+geom.mirrorCenterY;
@@ -63,6 +60,12 @@ function computeSlope(aqPar, geom, deltaX, deltaY)
     writematrix(w_x,[aqPar.testName '/postprocessing/w_x_0.txt']);
     writematrix(w_y,[aqPar.testName '/postprocessing/w_y_0.txt']);
 end
+
+    %% DDDDEBBBUIG
+%     phaseOffsetV = rectUnwrappedMapV(56,56);
+%     phaseOffsetH = rectUnwrappedMapH(56,56);
+%     phaseOffsetV = -0.4;
+%     phaseOffsetH = 0.4;
 
     %geom.cameraX = -geom.cameraX;
     %geom.cameraX = 0;

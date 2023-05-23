@@ -1,37 +1,38 @@
 %% computeSlope REMOVED PHASE OFFSET
-function computeSlope(aqPar, geom, deltaX, deltaY)
+function computeSlope(aqPar, geom,centX0,centY0)
     %read unwrapped phase, and flip because screen is flipped.
-    rectUnwrappedMapV = -readmatrix([aqPar.testName '/postprocessing/rectUnwrappedMapV.txt']);
-    rectUnwrappedMapH = readmatrix([aqPar.testName '/postprocessing/rectUnwrappedMapH.txt']);
+    unwrappedMapV = -readmatrix([aqPar.testName '/postprocessing/unwrappedMapV.txt']);
+    unwrappedMapH = readmatrix([aqPar.testName '/postprocessing/unwrappedMapH.txt']);
     
-    [rows, cols] = size(rectUnwrappedMapV);
-    centerX = round(cols/2);
-    centerY = round(rows/2);
-    indexX = centerX + deltaX;
-    indexY = centerY + deltaY;
+%     [rows, cols] = size(rectUnwrappedMapV);
+%     centerX = round(cols/2);
+%     centerY = round(rows/2);
+%     indexX = centerX + deltaX;
+%     indexY = centerY + deltaY;
+% 
+    phaseOffsetV = unwrappedMapV(centY0,centX0);
+    phaseOffsetH = unwrappedMapH(centY0,centX0);
 
-    phaseOffsetV = rectUnwrappedMapV(indexY,indexX);
-    phaseOffsetH = rectUnwrappedMapH(indexY,indexX);
-
-    adjRectUnwrappedMapV = rectUnwrappedMapV-phaseOffsetV;
-    adjRectUnwrappedMapH = rectUnwrappedMapH-phaseOffsetH;
+    adjUnwrappedMapV = unwrappedMapV-phaseOffsetV;
+    adjUnwrappedMapH = unwrappedMapH-phaseOffsetH;
     
     mirrorX_mm = aqPar.mirrorX_mm_+geom.mirrorCenterX;
     mirrorY_mm = aqPar.mirrorY_mm_+geom.mirrorCenterY;
 
     %for screen, go to pixel by N*2 pi, then convert to mm and add zero phase
-    x_screen_ = adjRectUnwrappedMapV*aqPar.canvasSize_px/(aqPar.fringesOnCanvas*2*pi)*aqPar.screen_mm_per_px;
-    y_screen_ = adjRectUnwrappedMapH*aqPar.canvasSize_px/(aqPar.fringesOnCanvas*2*pi)*aqPar.screen_mm_per_px;
+    x_screen_ = adjUnwrappedMapV*aqPar.canvasSize_px/(aqPar.fringesOnCanvas*2*pi)*aqPar.screen_mm_per_px;
+    y_screen_ = adjUnwrappedMapH*aqPar.canvasSize_px/(aqPar.fringesOnCanvas*2*pi)*aqPar.screen_mm_per_px;
     x_screen = x_screen_ + geom.zeroPhaseScreenX;
     y_screen = y_screen_ + geom.zeroPhaseScreenY;
     
-    [theta,rho] = cart2pol(aqPar.mirrorX_px_,aqPar.mirrorY_px_);
-    d = 2*rho*aqPar.image_mm_per_px;
-    diameter = 2*aqPar.measurementRadius_px*aqPar.image_mm_per_px;
-    
-    %calculate distance to screen & camera from mirror
-    s = -(geom.RoC - sqrt(geom.RoC^2 - ((diameter-d)/2).^2));
-    s = s+max(abs(s),[],'All');
+%     [theta,rho] = cart2pol(aqPar.mirrorX_px_,aqPar.mirrorY_px_);
+%     d = 2*rho*aqPar.image_mm_per_px;
+%     diameter = 2*aqPar.measurementRadius_px*aqPar.image_mm_per_px;
+%     
+%     %calculate distance to screen & camera from mirror
+%     s = -(geom.RoC - sqrt(geom.RoC^2 - ((diameter-d)/2).^2));
+%     s = s+max(abs(s),[],'All');
+    s= 0;
 
     %%mirror to camera
     m2c(:,:,1) = geom.cameraX-mirrorX_mm;

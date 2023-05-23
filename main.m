@@ -54,12 +54,20 @@ else
 end
 
 % Create mirror coordinate system from px to mm
-aqPar.boundingBox = boundingBox(aqPar.mask);
-onesMatrix = ones(length(aqPar.boundingBox.rows), length(aqPar.boundingBox.cols));
-aqPar.mirrorX_px_ = -aqPar.measurementRadius_px+onesMatrix.*(1:size(onesMatrix,2));
-aqPar.mirrorY_px_ =  aqPar.measurementRadius_px-onesMatrix.*(1:size(onesMatrix,1))';
+x = 1:aqPar.imageSizeX; 
+y = 1:aqPar.imageSizeY;
+[aqPar.mirrorX_px_, aqPar.mirrorY_px_] = meshgrid(x, y);
+aqPar.mirrorX_px_ = aqPar.mirrorX_px_ - aqPar.center(1);
+aqPar.mirrorY_px_ = aqPar.mirrorY_px_ - aqPar.center(2);
 aqPar.mirrorX_mm_ = aqPar.mirrorX_px_.*aqPar.image_mm_per_px;
-aqPar.mirrorY_mm_ = aqPar.mirrorY_px_.*aqPar.image_mm_per_px;
+aqPar.mirrorY_mm_ = -aqPar.mirrorY_px_.*aqPar.image_mm_per_px;
+
+% aqPar.boundingBox = boundingBox(aqPar.mask);
+% onesMatrix = ones(length(aqPar.boundingBox.rows), length(aqPar.boundingBox.cols));
+% aqPar.mirrorX_px_ = -aqPar.measurementRadius_px+onesMatrix.*(1:size(onesMatrix,2));
+% aqPar.mirrorY_px_ =  aqPar.measurementRadius_px-onesMatrix.*(1:size(onesMatrix,1))';
+% aqPar.mirrorX_mm_ = aqPar.mirrorX_px_.*aqPar.image_mm_per_px;
+% aqPar.mirrorY_mm_ = aqPar.mirrorY_px_.*aqPar.image_mm_per_px;
 
 if(zerophase); showZeroPhase(aqPar); pause; end
 
@@ -76,18 +84,18 @@ for i = 1:length(testNames)
         %showImagedArea(aqPar);
         %imagePhases(aqPar,cam,cameraParams);
         %closeCameras(cam.CameraNumber)
-        makeSTLSphereWithAstigmatism(geom, aqPar, 0, [aqPar.testName '/postprocessing/w0.stl'],'parabolic'); %
-        rayTrace([aqPar.testName '/postprocessing/w0.stl'], [aqPar.testName '/imagesVirtual/imageZeroPhase.png'], 0, 'zerophase');
-        imageVirtualPhases(aqPar);
+        %makeSTLSphereWithAstigmatism(geom, aqPar, 0, [aqPar.testName '/postprocessing/w0.stl'],'parabolic'); %
+        %rayTrace([aqPar.testName '/postprocessing/w0.stl'], [aqPar.testName '/imagesVirtual/imageZeroPhase.png'], 0, 'zerophase');
+        %imageVirtualPhases(aqPar);
     end
     if(integrate)
         %darkSubtract(aqPar);
-        [deltaX, deltaY, ~, ~] = computeZeroPhaseLoc(aqPar, [aqPar.testName '/imagesVirtual/imageZeroPhase.png']);%[aqPar.testName '/darkSubtracted/ds_imageZeroPhase.png']
+        [deltaX, deltaY, centX0, centY0] = computeZeroPhaseLoc(aqPar, [aqPar.testName '/imagesVirtual/imageZeroPhase.png']);%[aqPar.testName '/darkSubtracted/ds_imageZeroPhase.png']
         %computePhaseMap(aqPar,[aqPar.testName '/darkSubtracted'],[aqPar.testName '/postprocessing']);
-        computePhaseMap(aqPar,[aqPar.testName '/imagesVirtual'],[aqPar.testName '/postprocessing']);
-        plotPhaseMap(aqPar);
-        unwrapPhaseMap(aqPar);%ok
-        computeSlope(aqPar,geom,round(deltaX),round(deltaY));
+        %computePhaseMap(aqPar,[aqPar.testName '/imagesVirtual'],[aqPar.testName '/postprocessing']);
+        %plotPhaseMap(aqPar);
+        unwrapPhaseMap(aqPar);
+        computeSlope(aqPar,geom,centX0,centY0);
         plotSlopes(aqPar);
         integrateShape(aqPar);
         shapeAnalysis(aqPar);
