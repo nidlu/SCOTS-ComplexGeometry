@@ -54,7 +54,7 @@ else
 end
 
 % Create mirror coordinate system from px to mm
-x = 1:aqPar.imageSizeX; 
+x = 1:aqPar.imageSizeX;
 y = 1:aqPar.imageSizeY;
 [aqPar.mirrorX_px_, aqPar.mirrorY_px_] = meshgrid(x, y);
 aqPar.mirrorX_px_ = aqPar.mirrorX_px_ - aqPar.center(1);

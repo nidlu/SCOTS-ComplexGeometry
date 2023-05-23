@@ -3,13 +3,7 @@ function computeSlope(aqPar, geom,centX0,centY0)
     %read unwrapped phase, and flip because screen is flipped.
     unwrappedMapV = -readmatrix([aqPar.testName '/postprocessing/unwrappedMapV.txt']);
     unwrappedMapH = readmatrix([aqPar.testName '/postprocessing/unwrappedMapH.txt']);
-    
-%     [rows, cols] = size(rectUnwrappedMapV);
-%     centerX = round(cols/2);
-%     centerY = round(rows/2);
-%     indexX = centerX + deltaX;
-%     indexY = centerY + deltaY;
-% 
+
     phaseOffsetV = unwrappedMapV(centY0,centX0);
     phaseOffsetH = unwrappedMapH(centY0,centX0);
 
@@ -25,15 +19,12 @@ function computeSlope(aqPar, geom,centX0,centY0)
     x_screen = x_screen_ + geom.zeroPhaseScreenX;
     y_screen = y_screen_ + geom.zeroPhaseScreenY;
     
-%     [theta,rho] = cart2pol(aqPar.mirrorX_px_,aqPar.mirrorY_px_);
-%     d = 2*rho*aqPar.image_mm_per_px;
-%     diameter = 2*aqPar.measurementRadius_px*aqPar.image_mm_per_px;
-%     
-%     %calculate distance to screen & camera from mirror
-%     s = -(geom.RoC - sqrt(geom.RoC^2 - ((diameter-d)/2).^2));
-%     s = s+max(abs(s),[],'All');
-    s= 0;
-
+    %calculate sphere (NaN outside bounds)
+    s = -sqrt(geom.RoC^2 - aqPar.mirrorX_mm_.^2 - aqPar.mirrorY_mm_.^2)+geom.RoC;
+    s(aqPar.mirrorX_mm_.^2 + aqPar.mirrorY_mm_.^2 > 100^2) = NaN;
+    s=0;
+    %imagesc(s);colorbar;
+    
     %%mirror to camera
     m2c(:,:,1) = geom.cameraX-mirrorX_mm;
     m2c(:,:,2) = geom.cameraY-mirrorY_mm;
@@ -61,25 +52,3 @@ function computeSlope(aqPar, geom,centX0,centY0)
     writematrix(w_x,[aqPar.testName '/postprocessing/w_x_0.txt']);
     writematrix(w_y,[aqPar.testName '/postprocessing/w_y_0.txt']);
 end
-
-    %% DDDDEBBBUIG
-%     phaseOffsetV = rectUnwrappedMapV(56,56);
-%     phaseOffsetH = rectUnwrappedMapH(56,56);
-%     phaseOffsetV = -0.4;
-%     phaseOffsetH = 0.4;
-
-    %geom.cameraX = -geom.cameraX;
-    %geom.cameraX = 0;
-    %mirrorX_mm = -mirrorX_mm;
-    %mirrorX_mm = zeros(size(mirrorX_mm));
-    
-
-%     avg = (m2cNormalized+m2sNormalized)/2;
-%     avgNorm = vecnorm(avg, 2, 3); %calculate norm of vector field along the third dimension
-%     avgNormalized = avg./avgNorm;
-
-%     w_x_0 = w_x;%-tiltOffsetX;
-%     w_y_0 = w_y;%-tiltOffsetY;
-    %remove tilt from the image by setting gradient 0 at center
-    %tiltOffsetX = w_x(aqPar.measurementRadius_px, aqPar.measurementRadius_px);%check xy&sign
-    %tiltOffsetY = w_y(aqPar.measurementRadius_px, aqPar.measurementRadius_px);%check xy&sign
