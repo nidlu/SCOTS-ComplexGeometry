@@ -52,7 +52,30 @@ function shapeAnalysis(aqPar)
     tri = delaunay(vertices(:,1), vertices(:,2));
     Z_mirrorRef = griddata(vertices(:,1), vertices(:,2), vertices(:,3), aqPar.mirrorX_mm_, aqPar.mirrorY_mm_, 'linear');
     
+    f = 2500/2; % focal length in mm
+    % Calculate ideal parabolic shape over the meshgrid
+    Z_parabolic = (aqPar.mirrorX_mm_.^2 + aqPar.mirrorY_mm_.^2) / (4*f);
+    % Subtract ideal parabolic shape from Z_mirrorRef
+    Z_mirrorRef = Z_mirrorRef - Z_parabolic;
+
+    
+%     coef_Zernike = decomposition_Zernike(rho_Z, theta_Z, Z_mirrorRef, 15);
+%     for i = [1,5] % For the first four Zernike modes (start from 0 as per Malacara's convention)
+%         Z_mode(:,:,i) = calcul_mode_zernike_Malacara2(i-1, rho_Z, theta_Z);
+%         Z_mirrorRef = Z_mirrorRef - coef_Zernike(i) * Z_mode(:,:,i);
+%     end   
+    
+    
+    
     error = (Z_mirrorRef-z)*1000;
+    
+    figure
+    surf(Z_mirrorRef(50:70,145:165))
+    figure
+    surf(z(50:70,145:165))
+    figure
+    surf(z(50:70,145:165)-Z_mirrorRef(50:70,145:165))
+    
     
     coef_Zernike = decomposition_Zernike(rho_Z, theta_Z, error, 15);
     for i = [1,2,3] % For the first four Zernike modes (start from 0 as per Malacara's convention)

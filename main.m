@@ -81,8 +81,8 @@ for i = 1:length(testNames)
         %imagePhases(aqPar,cam,cameraParams);
         %closeCameras(cam.CameraNumber)
         %makeSTLSphereWithAstigmatism(geom, aqPar, 0, [aqPar.testName '/postprocessing/w0.stl'],'parabolic'); %
-        rayTrace([aqPar.testName '/postprocessing/w0.stl'], [aqPar.testName '/imagesVirtual/imageZeroPhase.png'], 0, 'zerophase');
-        imageVirtualPhases(aqPar);
+        %rayTrace([aqPar.testName '/postprocessing/w0.stl'], [aqPar.testName '/imagesVirtual/imageZeroPhase.png'], 0, 'zerophase');
+        %imageVirtualPhases(aqPar);
     end
     if(integrate)
         %darkSubtract(aqPar);
@@ -90,7 +90,7 @@ for i = 1:length(testNames)
         centX0 = aqPar.imageMirrorCenterX_px;
         centY0 = aqPar.imageMirrorCenterY_px;
         %computePhaseMap(aqPar,[aqPar.testName '/darkSubtracted'],[aqPar.testName '/postprocessing']);
-        computePhaseMap(aqPar,[aqPar.testName '/imagesVirtual'],[aqPar.testName '/postprocessing']);
+        %computePhaseMap(aqPar,[aqPar.testName '/imagesVirtual'],[aqPar.testName '/postprocessing']);
         %plotPhaseMap(aqPar);
         unwrapPhaseMap(aqPar);
         computeSlope(aqPar,geom,centX0,centY0);

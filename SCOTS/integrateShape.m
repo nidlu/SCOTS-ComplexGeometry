@@ -13,7 +13,18 @@ function integrateShape(aqPar)
 
     figure();imagesc(w_x);colorbar;
     figure();imagesc(w_y);colorbar;
-    %% Subtract gradients
+    
+    %% subtract parabolic, commnet go to full itnegration
+    f = 2500/4; % focal length in mm
+
+    slope_x_parabolic = aqPar.mirrorX_mm_/(2*f);
+    slope_y_parabolic = aqPar.mirrorY_mm_/(2*f);
+
+    w_x = w_x - slope_x_parabolic;
+    w_y = w_y - slope_y_parabolic;
+
+    
+    %% Subtract gradiens, comment to go to full integration
 %     [X, Y] = meshgrid(1:size(w_x, 2), 1:size(w_x, 1));
 %     % Handle NaNs: Ignore them during fitting
 %     valid_x = ~isnan(X(:)) & ~isnan(w_x(:));
@@ -69,7 +80,7 @@ function integrateShape(aqPar)
     %% plot 
     surf(aqPar.mirrorX_mm_, aqPar.mirrorY_mm_, w); shading interp; view(2); 
     PV = max(w,[],'all')-min(w,[],'all');
-    title(sprintf("Measured height map, PV: %.2f mm",PV))
+    title(sprintf("Measured height map, PV: %.3f mm",PV))
     hc=colorbar;
     title(hc,'mm');
     xlabel("x_m - mm");
