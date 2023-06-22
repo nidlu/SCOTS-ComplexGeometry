@@ -67,6 +67,8 @@ screen_m_per_px = aqPar["screen_mm_per_px"]/1000
 image_m_per_px = aqPar["image_mm_per_px"]/1000
 fringesOnCanvas = aqPar["fringesOnCanvas"]
 scaleFactor = aqPar["imageResizingFactor"]
+rawImageSizeX = aqPar["rawImageSizeX"]
+rawImageSizeY = aqPar["rawImageSizeY"]
 cameraRotX = aqPar["cameraRotX"]
 cameraRotY = aqPar["cameraRotY"]
 canvasSize_m = canvasSize_px*screen_m_per_px
@@ -80,7 +82,7 @@ class CosGlow2D(InhomogeneousVolumeEmitter):
             if orientation == "horizontal":
                 spectrum.samples[:] = (sin(2 * pi * fringes_per_m * point.y + phase) + 1) / 2
             elif orientation == "vertical":
-                spectrum.samples[:] = (sin(2 * pi * fringes_per_m * point.x - phase) + 1) / 2
+                spectrum.samples[:] = (sin(2 * pi * fringes_per_m * point.x + phase) + 1) / 2
             elif orientation == "zerophase":
                 if(abs(point.x) < 1e-3 and abs(point.y) <1e-3):
                     spectrum.samples[:] = 1
@@ -98,7 +100,7 @@ mesh = import_stl(stl_file_path, scaling=0.001, mode='binary', parent=world,
 
 # Calculate the FOV based on the given pixel scale and distance
 distance_to_target = geom.mirrorCenterZ - geom.cameraZ
-larger_dimension = max(int(1280 * scaleFactor), int(960 * scaleFactor))
+larger_dimension = max(int(rawImageSizeX * scaleFactor), int(rawImageSizeY * scaleFactor))
 fov = 2 * arctan((0.5 * larger_dimension * image_m_per_px) / -distance_to_target) * (180 / pi)
 
 # camera
@@ -111,14 +113,14 @@ bayer = BayerPipeline2D(filter_red, filter_green, filter_blue,display_gamma=1,
                             display_unsaturated_fraction=1, name="Bayer Filter")
 #sampler = RGBAdaptiveSampler2D(bayer, min_samples=50, fraction=0.2)
 
-camera = PinholeCamera((int(1280*scaleFactor), int(960*scaleFactor)), parent=world, transform=translate(geom.cameraX+TMP_CAM_X_OFFSET, 
+camera = PinholeCamera((int(rawImageSizeX*scaleFactor), int(rawImageSizeY*scaleFactor)), parent=world, transform=translate(geom.cameraX+TMP_CAM_X_OFFSET, 
                                                             geom.cameraY, geom.cameraZ)*rotate_y(180+cameraRotY)*rotate_x(cameraRotX+TMP_CAM_X_ROT),
                        pipelines=[bayer])
 camera.fov = fov
 
 camera.spectral_bins = 1
 camera.spectral_rays = 1
-camera.pixel_samples = 20
+camera.pixel_samples = 100
 camera.render_engine = MulticoreEngine(4)
 
 # integration resolution

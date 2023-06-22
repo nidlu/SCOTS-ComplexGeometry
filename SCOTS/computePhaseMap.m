@@ -29,6 +29,9 @@ function computePhaseMap(aqPar,inputDir,outputDir)
     for i = 1:aqPar.imageSizeY
         for j = 1:aqPar.imageSizeX
             if(aqPar.mask(i,j))
+                if(i==97 && j == 154)
+                    %display("center");
+                end
                 imageValuesH = double(reshape(imagesH(i,j,:),1,[]));
                 imageValuesV = double(reshape(imagesV(i,j,:),1,[]));
                 wrappedMapH(i,j) = sineFitRestricted(aqPar.phases,imageValuesH,false);

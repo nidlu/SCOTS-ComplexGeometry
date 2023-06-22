@@ -1,11 +1,12 @@
 %% computeSlope REMOVED PHASE OFFSET
 function computeSlope(aqPar, geom,centX0,centY0)
     %read unwrapped phase, and flip because screen is flipped.
-    unwrappedMapV = -readmatrix([aqPar.testName '/postprocessing/unwrappedMapV.txt']);
+    unwrappedMapV = readmatrix([aqPar.testName '/postprocessing/unwrappedMapV.txt']);
     unwrappedMapH = readmatrix([aqPar.testName '/postprocessing/unwrappedMapH.txt']);
 
-    phaseOffsetV = unwrappedMapV(centY0,centX0);
-    phaseOffsetH = unwrappedMapH(centY0,centX0);
+    disp("warning, phaseoffset set manually");
+    phaseOffsetV = 1.4;%1.419;%01.42;%1.42;%unwrappedMapV(centY0,centX0);
+    phaseOffsetH = 0;%unwrappedMapH(centY0,centX0);
 
     adjUnwrappedMapV = unwrappedMapV-phaseOffsetV;
     adjUnwrappedMapH = unwrappedMapH-phaseOffsetH;
@@ -19,11 +20,12 @@ function computeSlope(aqPar, geom,centX0,centY0)
     x_screen = x_screen_ + geom.zeroPhaseScreenX;
     y_screen = y_screen_ + geom.zeroPhaseScreenY;
     
-    %calculate sphere (NaN outside bounds)
-    s = -sqrt(geom.RoC^2 - aqPar.mirrorX_mm_.^2 - aqPar.mirrorY_mm_.^2)+geom.RoC;
-    s(aqPar.mirrorX_mm_.^2 + aqPar.mirrorY_mm_.^2 > 100^2) = NaN;
+    %sphere
+    %s = -sqrt(geom.RoC^2 - aqPar.mirrorX_mm_.^2 - aqPar.mirrorY_mm_.^2)+geom.RoC;
+    %paraboloid
+    %s = (aqPar.mirrorX_mm_.^2 + aqPar.mirrorY_mm_.^2) / (2*geom.RoC);
+    %s(aqPar.mirrorX_mm_.^2 + aqPar.mirrorY_mm_.^2 > 95^2) = NaN;
     s=0;
-    %imagesc(s);colorbar;
     
     %%mirror to camera
     m2c(:,:,1) = geom.cameraX-mirrorX_mm;
