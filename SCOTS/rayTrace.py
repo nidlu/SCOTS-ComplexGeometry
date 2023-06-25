@@ -3,13 +3,14 @@ import os
 import sys
 import time
 import json
+import logging
 from matplotlib.pyplot import *
 from matplotlib.pyplot import imshow, savefig #debug
 from math import pi
 from numpy import sqrt, sin, cos, arctan, pi
 from types import SimpleNamespace
 
-from raysect.optical import World, translate, rotate,rotate_y,rotate_x, Point3D
+from raysect.optical import World, translate, rotate,rotate_y,rotate_x,rotate_z, Point3D
 from raysect.optical.library import RoughTitanium
 from raysect.optical.material import UnitySurfaceEmitter
 from raysect.optical.material import InhomogeneousVolumeEmitter
@@ -21,8 +22,14 @@ from raysect.primitive import import_stl
 from raysect.optical import InterpolatedSF
 from raysect.optical.observer import BayerPipeline2D
 
-TMP_CAM_X_OFFSET = 0.0
+logging.basicConfig(filename='logfile.log', encoding='utf-8', level=logging.DEBUG)
+
+TMP_CAM_X_OFFSET = 0.000
+TMP_CAM_Y_OFFSET = 0.000
+TMP_CAM_Z_OFFSET = -0.002
 TMP_CAM_X_ROT = 0
+TMP_CAM_Y_ROT = 0
+TMP_CAM_Z_ROT = 0
 
 # Check if a command-line argument was provided
 if len(sys.argv) < 5:
@@ -71,8 +78,12 @@ rawImageSizeX = aqPar["rawImageSizeX"]
 rawImageSizeY = aqPar["rawImageSizeY"]
 cameraRotX = aqPar["cameraRotX"]
 cameraRotY = aqPar["cameraRotY"]
+zeroPhaseOffset = aqPar["zeroPhaseOffset"]
 canvasSize_m = canvasSize_px*screen_m_per_px
 fringes_per_m = fringesOnCanvas/canvasSize_m
+
+logging.debug("the phase offset in m is")
+logging.debug(zeroPhaseOffset/(2 * pi * fringes_per_m))
 
 class CosGlow2D(InhomogeneousVolumeEmitter):
     def emission_function(self, point, direction, spectrum, world, ray, primitive, to_local, to_world):
@@ -84,7 +95,7 @@ class CosGlow2D(InhomogeneousVolumeEmitter):
             elif orientation == "vertical":
                 spectrum.samples[:] = (sin(2 * pi * fringes_per_m * point.x + phase) + 1) / 2
             elif orientation == "zerophase":
-                if(abs(point.x) < 1e-3 and abs(point.y) <1e-3):
+                if(abs(point.x) < 1e-3 and abs(point.y+(zeroPhaseOffset/(2 * pi * fringes_per_m))) <1e-3):
                     spectrum.samples[:] = 1
         return spectrum
 
@@ -113,9 +124,13 @@ bayer = BayerPipeline2D(filter_red, filter_green, filter_blue,display_gamma=1,
                             display_unsaturated_fraction=1, name="Bayer Filter")
 #sampler = RGBAdaptiveSampler2D(bayer, min_samples=50, fraction=0.2)
 
-camera = PinholeCamera((int(rawImageSizeX*scaleFactor), int(rawImageSizeY*scaleFactor)), parent=world, transform=translate(geom.cameraX+TMP_CAM_X_OFFSET, 
-                                                            geom.cameraY, geom.cameraZ)*rotate_y(180+cameraRotY)*rotate_x(cameraRotX+TMP_CAM_X_ROT),
-                       pipelines=[bayer])
+camera = PinholeCamera((int(rawImageSizeX*scaleFactor), int(rawImageSizeY*scaleFactor)), parent=world, transform=
+                                                            translate(geom.cameraX+TMP_CAM_X_OFFSET, 
+                                                            geom.cameraY+TMP_CAM_Y_OFFSET,
+                                                            geom.cameraZ+TMP_CAM_Z_OFFSET)
+                                                            *rotate_z(TMP_CAM_Z_ROT)
+                                                            *rotate_y(180+cameraRotY+TMP_CAM_Y_ROT)
+                                                            *rotate_x(cameraRotX+TMP_CAM_X_ROT), pipelines=[bayer])
 camera.fov = fov
 
 camera.spectral_bins = 1

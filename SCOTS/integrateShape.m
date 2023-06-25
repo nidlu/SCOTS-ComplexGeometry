@@ -78,11 +78,11 @@ function integrateShape(aqPar)
     w = mumford_shah_integration(p,q,gradientMaskEroded,lambda,z0,mu,epsilon,maxit,tol,zinit);
     
     %% plot 
-    surf(aqPar.mirrorX_mm_, aqPar.mirrorY_mm_, w); shading interp; view(2); 
+    surf(aqPar.mirrorX_mm_, aqPar.mirrorY_mm_, w*1000); shading interp; view(2); 
     PV = max(w,[],'all')-min(w,[],'all');
-    title(sprintf("Measured height map, PV: %.3f mm",PV))
+    title(sprintf('Error from Parabolic, PV: %.1f \\mum', PV * 1000));
     hc=colorbar;
-    title(hc,'mm');
+    title(hc,'\mum');
     xlabel("x_m - mm");
     ylabel("y_m - mm");
     axis square;

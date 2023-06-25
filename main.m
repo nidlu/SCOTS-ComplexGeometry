@@ -7,8 +7,6 @@
 %C:\Users\cjgn44\Google Drive\ULB\SCOTS-ComplexGeometry\data\06_06_2023_tipDisplacement1\tipDisplacement1\tipDisplacementPetal_RoC2.5_50um.stl
 
 %% Paths and Imports
-%still in petalSandbox
-%new change
 clc;clearvars;close all;
 import matlab.net.*
 import matlab.net.http.*
@@ -25,7 +23,7 @@ addpath('SCOTS/zernikeExpansion');%
 load('cameraParams_ASI120_T1.mat'); %%load camera calibration data
 %% Flags
 aqPar.applyCameraCompensation = 0;
-testNames{1} = 'data/22_06_2023_tip/50um';
+testNames{1} = 'data/25_06_2023_tip_coarse_100um_tolerance/2mmCamZ';
 zerophase = 0;
 acquire = 1;
 integrate = 1;
@@ -81,16 +79,16 @@ for i = 1:length(testNames)
         %imagePhases(aqPar,cam,cameraParams);
         %closeCameras(cam.CameraNumber)
         %makeSTLSphereWithAstigmatism(geom, aqPar, 0, [aqPar.testName '/postprocessing/w0.stl'],'parabolic'); %
-        %rayTrace([aqPar.testName '/postprocessing/w0.stl'], [aqPar.testName '/imagesVirtual/imageZeroPhase.png'], 0, 'zerophase');
-        %imageVirtualPhases(aqPar);
+        rayTrace([aqPar.testName '/postprocessing/w0.stl'], [aqPar.testName '/imagesVirtual/imageZeroPhase.png'], 0, 'zerophase');
+        imageVirtualPhases(aqPar);
     end
     if(integrate)
         %darkSubtract(aqPar);
-        %[deltaX, deltaY, centX0, centY0] = computeZeroPhaseLoc(aqPar, [aqPar.testName '/imagesVirtual/imageZeroPhase.png']);%[aqPar.testName '/darkSubtracted/ds_imageZeroPhase.png']
-        centX0 = aqPar.imageMirrorCenterX_px;
-        centY0 = aqPar.imageMirrorCenterY_px;
+        [deltaX, deltaY, centX0, centY0, ~, ~] = computeZeroPhaseLoc(aqPar, [aqPar.testName '/imagesVirtual/imageZeroPhase.png']);%[aqPar.testName '/darkSubtracted/ds_imageZeroPhase.png']
+        %centX0 = aqPar.imageMirrorCenterX_px;
+        %centY0 = aqPar.imageMirrorCenterY_px;
         %computePhaseMap(aqPar,[aqPar.testName '/darkSubtracted'],[aqPar.testName '/postprocessing']);
-        %computePhaseMap(aqPar,[aqPar.testName '/imagesVirtual'],[aqPar.testName '/postprocessing']);
+        computePhaseMap(aqPar,[aqPar.testName '/imagesVirtual'],[aqPar.testName '/postprocessing']);
         %plotPhaseMap(aqPar);
         unwrapPhaseMap(aqPar);
         computeSlope(aqPar,geom,centX0,centY0);

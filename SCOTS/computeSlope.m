@@ -4,9 +4,9 @@ function computeSlope(aqPar, geom,centX0,centY0)
     unwrappedMapV = readmatrix([aqPar.testName '/postprocessing/unwrappedMapV.txt']);
     unwrappedMapH = readmatrix([aqPar.testName '/postprocessing/unwrappedMapH.txt']);
 
-    disp("warning, phaseoffset set manually");
-    phaseOffsetV = 1.4;%1.419;%01.42;%1.42;%unwrappedMapV(centY0,centX0);
-    phaseOffsetH = 0;%unwrappedMapH(centY0,centX0);
+    disp("computeSlope: warning, phaseoffset set manually");
+    phaseOffsetV = unwrappedMapV(centY0,centX0)-0.025; %2.7;%1.419;%01.42;%1.42;
+    phaseOffsetH = unwrappedMapH(centY0,centX0)+aqPar.zeroPhaseOffset - 0.12; 
 
     adjUnwrappedMapV = unwrappedMapV-phaseOffsetV;
     adjUnwrappedMapH = unwrappedMapH-phaseOffsetH;
@@ -25,6 +25,7 @@ function computeSlope(aqPar, geom,centX0,centY0)
     %paraboloid
     %s = (aqPar.mirrorX_mm_.^2 + aqPar.mirrorY_mm_.^2) / (2*geom.RoC);
     %s(aqPar.mirrorX_mm_.^2 + aqPar.mirrorY_mm_.^2 > 95^2) = NaN;
+    disp("computeSlope: not including sphericity")
     s=0;
     
     %%mirror to camera

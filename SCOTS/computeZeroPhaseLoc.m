@@ -1,4 +1,4 @@
-function [deltaX, deltaY, centX0, centY0] = computeZeroPhaseLoc(aqPar, imgPath)
+function [deltaX, deltaY, centX0, centY0,centX,centY] = computeZeroPhaseLoc(aqPar, imgPath)
     zeroPhaseImg = im2gray(imread(imgPath));
     maximum = max(max(zeroPhaseImg));
     [centY0,centX0]=find(zeroPhaseImg==maximum);
