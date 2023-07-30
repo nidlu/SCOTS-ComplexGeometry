@@ -3,13 +3,14 @@ import os
 import sys
 import time
 import json
+import logging
 from matplotlib.pyplot import *
 from matplotlib.pyplot import imshow, savefig #debug
 from math import pi
 from numpy import sqrt, sin, cos, arctan, pi
 from types import SimpleNamespace
 
-from raysect.optical import World, translate, rotate,rotate_y,rotate_x, Point3D
+from raysect.optical import World, translate, rotate,rotate_y,rotate_x,rotate_z, Point3D
 from raysect.optical.library import RoughTitanium
 from raysect.optical.material import UnitySurfaceEmitter
 from raysect.optical.material import InhomogeneousVolumeEmitter
@@ -21,7 +22,14 @@ from raysect.primitive import import_stl
 from raysect.optical import InterpolatedSF
 from raysect.optical.observer import BayerPipeline2D
 
-TMP_CAM_X_OFFSET = 0.0
+logging.basicConfig(filename='logfile.log', encoding='utf-8', level=logging.DEBUG)
+
+TMP_CAM_X_OFFSET = 0.000
+TMP_CAM_Y_OFFSET = 0.000
+TMP_CAM_Z_OFFSET = -0.002
+TMP_CAM_X_ROT = 0
+TMP_CAM_Y_ROT = 0
+TMP_CAM_Z_ROT = 0
 
 # Check if a command-line argument was provided
 if len(sys.argv) < 5:
@@ -34,8 +42,8 @@ output_file_path = sys.argv[2]
 phase = float(sys.argv[3])
 orientation = sys.argv[4].lower()
 
-if orientation not in ["horizontal", "vertical"]:
-    print("Error: The orientation must be either 'horizontal' or 'vertical'.")
+if orientation not in ["horizontal", "vertical", "zerophase"]:
+    print("Error: Thee orientation must be either 'horizontal' or 'vertical'.")
     sys.exit(1)
 
 #output_file_path = r"/mnt/c/Users/cjgn44/Google Drive/ULB/SCOTS5/rayTraceTest.png"
@@ -66,10 +74,16 @@ screen_m_per_px = aqPar["screen_mm_per_px"]/1000
 image_m_per_px = aqPar["image_mm_per_px"]/1000
 fringesOnCanvas = aqPar["fringesOnCanvas"]
 scaleFactor = aqPar["imageResizingFactor"]
+rawImageSizeX = aqPar["rawImageSizeX"]
+rawImageSizeY = aqPar["rawImageSizeY"]
 cameraRotX = aqPar["cameraRotX"]
 cameraRotY = aqPar["cameraRotY"]
+zeroPhaseOffset = aqPar["zeroPhaseOffset"]
 canvasSize_m = canvasSize_px*screen_m_per_px
 fringes_per_m = fringesOnCanvas/canvasSize_m
+
+logging.debug("the phase offset in m is")
+logging.debug(zeroPhaseOffset/(2 * pi * fringes_per_m))
 
 class CosGlow2D(InhomogeneousVolumeEmitter):
     def emission_function(self, point, direction, spectrum, world, ray, primitive, to_local, to_world):
@@ -79,8 +93,12 @@ class CosGlow2D(InhomogeneousVolumeEmitter):
             if orientation == "horizontal":
                 spectrum.samples[:] = (sin(2 * pi * fringes_per_m * point.y + phase) + 1) / 2
             elif orientation == "vertical":
-                spectrum.samples[:] = (sin(2 * pi * fringes_per_m * point.x - phase) + 1) / 2
+                spectrum.samples[:] = (sin(2 * pi * fringes_per_m * point.x + phase) + 1) / 2
+            elif orientation == "zerophase":
+                if(abs(point.x) < 1e-3 and abs(point.y+(zeroPhaseOffset/(2 * pi * fringes_per_m))) <1e-3):
+                    spectrum.samples[:] = 1
         return spectrum
+
 
 # scene
 world = World()
@@ -93,7 +111,7 @@ mesh = import_stl(stl_file_path, scaling=0.001, mode='binary', parent=world,
 
 # Calculate the FOV based on the given pixel scale and distance
 distance_to_target = geom.mirrorCenterZ - geom.cameraZ
-larger_dimension = max(int(1280 * scaleFactor), int(960 * scaleFactor))
+larger_dimension = max(int(rawImageSizeX * scaleFactor), int(rawImageSizeY * scaleFactor))
 fov = 2 * arctan((0.5 * larger_dimension * image_m_per_px) / -distance_to_target) * (180 / pi)
 
 # camera
@@ -103,16 +121,21 @@ filter_green = InterpolatedSF([100, 530, 540, 550, 560, 800], [0, 0, 1, 1, 0, 0]
 filter_blue = InterpolatedSF([100, 480, 490, 500, 510, 800], [0, 0, 1, 1, 0, 0])
 
 bayer = BayerPipeline2D(filter_red, filter_green, filter_blue,display_gamma=1,
-                            display_unsaturated_fraction=0.98, name="Bayer Filter")
+                            display_unsaturated_fraction=1, name="Bayer Filter")
 #sampler = RGBAdaptiveSampler2D(bayer, min_samples=50, fraction=0.2)
 
-camera = PinholeCamera((int(1280*scaleFactor), int(960*scaleFactor)), parent=world, transform=translate(geom.cameraX+TMP_CAM_X_OFFSET, geom.cameraY, geom.cameraZ)*rotate_y(180+cameraRotY)*rotate_x(cameraRotX),
-                       pipelines=[bayer])
+camera = PinholeCamera((int(rawImageSizeX*scaleFactor), int(rawImageSizeY*scaleFactor)), parent=world, transform=
+                                                            translate(geom.cameraX+TMP_CAM_X_OFFSET, 
+                                                            geom.cameraY+TMP_CAM_Y_OFFSET,
+                                                            geom.cameraZ+TMP_CAM_Z_OFFSET)
+                                                            *rotate_z(TMP_CAM_Z_ROT)
+                                                            *rotate_y(180+cameraRotY+TMP_CAM_Y_ROT)
+                                                            *rotate_x(cameraRotX+TMP_CAM_X_ROT), pipelines=[bayer])
 camera.fov = fov
 
 camera.spectral_bins = 1
 camera.spectral_rays = 1
-camera.pixel_samples = 200
+camera.pixel_samples = 100
 camera.render_engine = MulticoreEngine(4)
 
 # integration resolution

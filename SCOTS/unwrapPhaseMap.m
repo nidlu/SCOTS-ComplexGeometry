@@ -3,29 +3,24 @@ function unwrapPhaseMap(aqPar)
     wrappedMapV = readmatrix([aqPar.testName '/postprocessing/wrappedMapV.txt']);
     wrappedMapH = readmatrix([aqPar.testName '/postprocessing/wrappedMapH.txt']);
     
-    %Extract part of image
-    rectWrappedMapV = wrappedMapV(aqPar.imageMirrorCenterY_px-aqPar.measurementRadius_px:aqPar.imageMirrorCenterY_px+aqPar.measurementRadius_px,...
-                                  aqPar.imageMirrorCenterX_px-aqPar.measurementRadius_px:aqPar.imageMirrorCenterX_px+aqPar.measurementRadius_px);
-    rectWrappedMapH = wrappedMapH(aqPar.imageMirrorCenterY_px-aqPar.measurementRadius_px:aqPar.imageMirrorCenterY_px+aqPar.measurementRadius_px,...
-                                  aqPar.imageMirrorCenterX_px-aqPar.measurementRadius_px:aqPar.imageMirrorCenterX_px+aqPar.measurementRadius_px);
+    mask = ones(size(wrappedMapV));
+    mask(isnan(wrappedMapV))=0;
     
-    %Phase unwrap within circular mask
-    mask = ones(size(rectWrappedMapV));
-    mask(isnan(rectWrappedMapV))=0;
-    rectWrappedMapV(isnan(rectWrappedMapV))=0;
-    unwrappedPhaseV = phase_unwrap(rectWrappedMapV,mask);
-    rectWrappedMapH(isnan(rectWrappedMapH))=0;
-    unwrappedPhaseH = phase_unwrap(rectWrappedMapH,mask);
-    %reset mask
+    interpWrappedMapV = inpaint_nans(wrappedMapV);
+    interpWrappedMapH = inpaint_nans(wrappedMapH);
+                              
+    unwrappedPhaseV = phase_unwrap(interpWrappedMapV,mask);
+    unwrappedPhaseH = phase_unwrap(interpWrappedMapH,mask);
+    
     unwrappedPhaseV(~mask) = NaN;
     unwrappedPhaseH(~mask) = NaN;
     
-    writematrix(unwrappedPhaseV,[aqPar.testName '/postprocessing/rectUnwrappedMapV.txt']);
-    writematrix(unwrappedPhaseH,[aqPar.testName '/postprocessing/rectUnwrappedMapH.txt']);
+    writematrix(unwrappedPhaseV,[aqPar.testName '/postprocessing/unwrappedMapV.txt']);
+    writematrix(unwrappedPhaseH,[aqPar.testName '/postprocessing/unwrappedMapH.txt']);
     
     %%
     figure()
-    surf(aqPar.mirrorX_mm_, aqPar.mirrorY_mm_, unwrappedPhaseV);
+    surf(unwrappedPhaseV);
     set(gca, 'XDir','reverse')
     title("Vertical unwrapped phase map");
     shading interp
@@ -57,7 +52,7 @@ function unwrapPhaseMap(aqPar)
     saveas(gcf,[aqPar.testName '/postprocessing/unwrappedMapV.png'])
     
     figure()
-    surf(aqPar.mirrorX_mm_, aqPar.mirrorY_mm_, unwrappedPhaseH);
+    surf(unwrappedPhaseH);
     set(gca, 'XDir','reverse')
     title("Horizontal unwrapped phase map");
     shading interp

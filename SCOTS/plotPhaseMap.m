@@ -1,10 +1,11 @@
-%% plot phaseMap
 function plotPhaseMap(aqPar)
     wrappedMapV = readmatrix([aqPar.testName '/postprocessing/wrappedMapV.txt']);
     wrappedMapH = readmatrix([aqPar.testName '/postprocessing/wrappedMapH.txt']);
+
+    bbox = boundingBox(aqPar.mask);
+
     figure()
-    surf(aqPar.mirrorX_mm_, aqPar.mirrorY_mm_, wrappedMapH(aqPar.imageMirrorCenterY_px-aqPar.measurementRadius_px:aqPar.imageMirrorCenterY_px+aqPar.measurementRadius_px,...
-                                             aqPar.imageMirrorCenterX_px-aqPar.measurementRadius_px:aqPar.imageMirrorCenterX_px+aqPar.measurementRadius_px))
+    surf(aqPar.mirrorX_mm_, aqPar.mirrorY_mm_, wrappedMapV(bbox.rows, bbox.cols))
     set(gca, 'XDir','reverse')
     title("Measured horizontal phase map")
     xlabel("x_m - mm");
@@ -14,13 +15,10 @@ function plotPhaseMap(aqPar)
     colorbar
     view(2)
     shading interp
-    colorbar
-    view(2)
     saveas(gcf,[aqPar.testName '/postprocessing/wrappedMapH.png'])
 
     figure()
-    surf(aqPar.mirrorX_mm_, aqPar.mirrorY_mm_, wrappedMapV(aqPar.imageMirrorCenterY_px-aqPar.measurementRadius_px:aqPar.imageMirrorCenterY_px+aqPar.measurementRadius_px,...
-                                             aqPar.imageMirrorCenterX_px-aqPar.measurementRadius_px:aqPar.imageMirrorCenterX_px+aqPar.measurementRadius_px))
+    surf(aqPar.mirrorX_mm_, aqPar.mirrorY_mm_, wrappedMapH(bbox.rows, bbox.cols))
     set(gca, 'XDir','reverse')
     title("Measured vertical phase map")
     shading interp

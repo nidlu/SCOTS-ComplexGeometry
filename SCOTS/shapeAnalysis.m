@@ -1,83 +1,80 @@
 %% shapeAnalysis
 %read w0.txt and plot with tip, tilt, defocus removed
-function f = shapeAnalysis(aqPar,geom)
+function shapeAnalysis(aqPar)
     z = readmatrix([aqPar.testName '/postprocessing/w0.txt']);
 
-    X=linspace(-1,1,length(z));
-    Y=linspace(1,-1,length(z));
-    [x,y] = meshgrid(X,Y);
+    Z_corrected = z; % Initialize a corrected matrix Z
     
-    indices = [];
-    for n = 0:5 %decompose to the 5th degree
-        for m = -n:2:n
-            indices = [indices; n m];
-        end
-    end
+    rho_Z=((aqPar.mirrorX_mm_.^2+aqPar.mirrorY_mm_.^2).^0.5)/(aqPar.measurementRadius_mm);
+    theta_Z=atan2(aqPar.mirrorY_mm_,aqPar.mirrorX_mm_);
 
-    % Display the coefficients associated with each Zernike polynomial used in
-    % the fit and their corresponding (n,m) indices.
-    disp(['    Coeff     ', 'n        ', 'm']);
-    moments = zernike_moments(z,indices);
-    disp([moments indices]);
+    coef_Zernike = decomposition_Zernike(rho_Z, theta_Z, z, 15);
+    % Calculate and subtract piston, tip, and tilt
+    disp("warning not subtracting tilt, manual piston offset")
+
+%     for i = [1] % For the first four Zernike modes (start from 0 as per Malacara's convention)
+%         Z_mode(:,:,i) = calcul_mode_zernike_Malacara2(i-1, rho_Z, theta_Z);
+%         Z_corrected = Z_corrected - coef_Zernike(i) * Z_mode(:,:,i);
+%     end   
+%     
+    disp("warning lots of changes, divide by 5 and piston");
+    Z_mode(:,:,5) = calcul_mode_zernike_Malacara2(5-1, rho_Z, theta_Z);
+    Z_corrected = Z_corrected - coef_Zernike(5) * Z_mode(:,:,5);
+    Z_corrected = Z_corrected-min(min(Z_corrected));
+    %Z_corrected = Z_corrected/5;
+    %Z_mode(:,:,13) = calcul_mode_zernike_Malacara2(13-1, rho_Z, theta_Z);
+    %Z_corrected = Z_corrected - coef_Zernike(13) * Z_mode(:,:,13);
     
-    %%create maps of tip tilt power and astigmatism
-    [t,r] = cart2pol(x,y);
-    n = 0; m=0;
-    z_piston = moments(indices(:,1) == n & indices(:,2) == m)*zernike(r,t,n,m);
-    n = 1; m=-1;
-    z_tilty = moments(indices(:,1) == n & indices(:,2) == m)*zernike(r,t,n,m);
-    n = 1; m=1;
-    z_tiltx = moments(indices(:,1) == n & indices(:,2) == m)*zernike(r,t,n,m);
-    n = 2; m=0;
-    z_defocus = moments(indices(:,1) == n & indices(:,2) == m)*zernike(r,t,n,m);
-    n = 2; m=2;
-    z_astigmatism = moments(indices(:,1) == n & indices(:,2) == m)*zernike(r,t,n,m);
-    
-    figure();
-    surface = z-z_piston-z_tiltx-z_tilty-z_defocus;
-    surf(aqPar.mirrorX_mm_, aqPar.mirrorY_mm_, surface); shading interp; view(2); 
-    PV = max(surface,[],'all')-min(surface,[],'all');
-    title(sprintf("Error from Spherical, PV: %.2f mm\n Test: %s",PV,aqPar.testName),'Interpreter', 'none')
+    figure()
+    surf(aqPar.mirrorX_mm_, aqPar.mirrorY_mm_, Z_corrected*1000); shading interp; view(2); 
+    PV = max(Z_corrected,[],'all')-min(Z_corrected,[],'all');
+    name = '50mm offset, sagitta included';
+    if(length(name)>30); name = aqPar.testName(end-30:end); end
+    title(sprintf("Error from Parabolic, PV: %.2f um\n Test: %s",PV*1000,'10um tip displacement'),'Interpreter', 'none')
+    %title(sprintf("Error from Parabolic, PV: %.2f um\n Test: %s",PV*1000,name),'Interpreter', 'none')
     hc=colorbar;
-    title(hc,'mm');
+    title(hc,'\mum');
     axis square;
     xlabel("x_m - mm");
     ylabel("y_m - mm");
     set(gcf,'Position',[400 200 450 350])
-    z_defocus(r>1)=NaN; %defocus 1 since the pupil is defined 0 to 1 above.
+    z_defocus = coef_Zernike(5)*Z_mode(:,:,5);
+    z_defocus(rho_Z>1)=NaN; %defocus 1 since the pupil is defined 0 to 1 above.
     PV_defocus = max(z_defocus,[],'all')-min(z_defocus,[],'all');
     RoC = aqPar.measurementRadius_mm^2 / (2*PV_defocus);
     annotation('textbox', [0.17, 0.13, 0.1, 0.1], 'String', ['RoC:' num2str(RoC/1000,3) 'm'],'BackgroundColor','white')
     
     saveas(gcf,[aqPar.testName '/postprocessing/measuredHeightMapNoDefocus.png'])
-
-    wrappedMapV = readmatrix([aqPar.testName '/postprocessing/wrappedMapV.txt']);
-    wrappedMapH = readmatrix([aqPar.testName '/postprocessing/wrappedMapH.txt']);
+    
+    %% Plot difference vs STL
+    measPoints = readmatrix('SCOTS\STL\samPoints');
+    measEdges = readmatrix('SCOTS\STL\samEdges');
+    measTriangles = readmatrix('SCOTS\STL\samTriangles');
+    measDeflection = readmatrix('SCOTS\STL\samDeflection');
+    Z_mirrorRef = 10*1000*griddata(measPoints(1,:)*1000, measPoints(2,:)*1000, measDeflection, aqPar.mirrorX_mm_, aqPar.mirrorY_mm_, 'linear');
+    
+    error = (Z_mirrorRef-z)*1000;
+    figure;imagesc(error);colorbar;
+    
+    
+    coef_Zernike = decomposition_Zernike(rho_Z, theta_Z, error, 15);
+    for i = [1,2,3] % For the first four Zernike modes (start from 0 as per Malacara's convention)
+        Z_mode(:,:,i) = calcul_mode_zernike_Malacara2(i-1, rho_Z, theta_Z);
+        error = error - coef_Zernike(i) * Z_mode(:,:,i);
+    end   
     figure()
-    v = [0,0];
-    offset = 0.1;
-    surf(aqPar.mirrorX_mm_, aqPar.mirrorY_mm_, surface-offset); shading interp; view(2); 
-    hold on;
-    contour(aqPar.mirrorX_mm_, aqPar.mirrorY_mm_,...
-        wrappedMapH(aqPar.imageMirrorCenterY_px-aqPar.measurementRadius_px:aqPar.imageMirrorCenterY_px+aqPar.measurementRadius_px,...
-        aqPar.imageMirrorCenterX_px-aqPar.measurementRadius_px:aqPar.imageMirrorCenterX_px+aqPar.measurementRadius_px),v,'w')
-    contour(aqPar.mirrorX_mm_, aqPar.mirrorY_mm_,...
-        wrappedMapV(aqPar.imageMirrorCenterY_px-aqPar.measurementRadius_px:aqPar.imageMirrorCenterY_px+aqPar.measurementRadius_px,...
-        aqPar.imageMirrorCenterX_px-aqPar.measurementRadius_px:aqPar.imageMirrorCenterX_px+aqPar.measurementRadius_px),v,'w')
-    title(sprintf("Residual error, grid, PV: %.2f mm\nPiston, Tilt and Defocus removed",PV))
+    surf(aqPar.mirrorX_mm_, aqPar.mirrorY_mm_, error);
+    shading interp; view(2); 
+    title("");
+    RMS = rms(error(~isnan(error)));
+    titleStr = sprintf('Error from Tip Displacement, RMS: %.2f \\mum', RMS);
+    title(titleStr);
+
+    hc=colorbar;
+    title(hc,'\mum');
+    axis square;
     xlabel("x_m - mm");
     ylabel("y_m - mm");
-    axis square;
-    c = colorbar;
-    c.TickLabels = c.Ticks+offset;
     set(gcf,'Position',[400 200 450 350])
-    view(2)
-    saveas(gcf,[aqPar.testName '/postprocessing/residualDeformationAndGrid.png'])
-%     figure();
-%     surface = z-z_piston-z_tiltx-z_tilty-z_defocus-z_astigmatism;
-%     surf(surface); shading interp; view(2); 
-%     PV = max(surface,[],'all')-min(surface,[],'all');
-%     title(sprintf("Piston, Tilt, Defocus and Astig removed, PV: %.2f mm",PV))
-%     hc=colorbar;
-%     title(hc,'mm');
+    
 end
